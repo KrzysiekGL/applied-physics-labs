@@ -1,0 +1,9 @@
+FROM jupyter/datascience-notebook:2023-02-28
+
+USER root
+RUN apt-get update --yes &&\
+		apt-get install --yes --no-install-recommends x11-apps xauth &&\
+		apt-get clean && rm -rf /var/lib/apt/lists/*
+
+USER ${NB_UID}
+RUN python -m pip install --upgrade opencv-python
