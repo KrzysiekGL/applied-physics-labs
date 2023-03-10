@@ -1,28 +1,27 @@
 #include "Keyboard.hpp"
+#include <ios>
+#include <istream>
+#include <limits>
+#include <memory>
 
 Keyboard & Keyboard::getInstance() {
     static Keyboard keyboard; // Meyers Singleton; thread safe
     return keyboard;
 }
 
-bool Keyboard::listen() const {
-  return bool(observators.size());
+bool Keyboard::haveReceivers() const {
+  return !observators.empty();
 }
 
 void Keyboard::signUpKey(std::shared_ptr<Key> key) {
-  observators.push_back(key);
+  observators.insert(std::pair<char, std::shared_ptr<Key>>(key->getKey(), key));
 }
 
-void Keyboard::setKeyPressed(char c) {
-  keyPressed = c;
-}
-
-std::istream & operator>>(std::istream & is, const Keyboard & obj) {
-  std::cout << "Keyboard is waiting for input...";
-  char c;
-  std::cin >> c;
-  std::cout << "Keybaord read letter " << c << '\n';
-  obj.setKeyPressed(c);
+std::istream & operator>>(std::istream & is, Keyboard & obj) {
+  std::cout << "Keyboard is waiting for input: ";
+  is >> obj.keyPressed;
+  auto node_handle = obj.observators.extract(obj.keyPressed);
+  std::cout << node_handle.value()->getKey() << std::endl;
   return is;
 }
 

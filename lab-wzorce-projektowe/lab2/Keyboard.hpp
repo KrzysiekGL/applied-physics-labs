@@ -1,9 +1,8 @@
 #pragma once
 
 #include <istream>
-#include <type_traits>
-#include <vector>
 #include <memory>
+#include <map>
 
 #include "Key.hpp"
 
@@ -17,19 +16,21 @@ private:
   Keyboard & operator=(const Keyboard&)=delete;
 
 public:
+  // Meyers Singleton (constructor)
   static Keyboard & getInstance();
-
+  // Register a receiver for the observer
   void signUpKey(std::shared_ptr<Key> key);
-  bool listen() const;
+  // Check wheter there are any receivers for the observer
+  bool haveReceivers() const;
 
-  friend std::istream & operator>>(std::istream &, const Keyboard &);
+  friend std::istream & operator>>(std::istream &, Keyboard &);
 
 private:
   // Last key pressed on the keyboard
   char keyPressed;
   // List of observators subscribed
-  std::vector<std::shared_ptr<Key>> observators;
-  void setKeyPressed(char c);
+  std::map<char, std::shared_ptr<Key>> observators;
 };
 
-std::istream & operator>>(std::istream &, const Keyboard &);
+std::istream & operator>>(std::istream &, Keyboard &);
+

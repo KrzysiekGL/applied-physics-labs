@@ -15,8 +15,8 @@ int main(int argc, char ** argv, char ** env) {
     keyboard.signUpKey(keys.back());
   }
 
-  while (std::cin >> keyboard) {
-  }
+  while (keyboard.haveReceivers())
+    std::cin >> keyboard;
 
   return 0;
 }
