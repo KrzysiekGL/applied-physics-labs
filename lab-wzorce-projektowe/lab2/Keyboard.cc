@@ -14,7 +14,7 @@ bool Keyboard::haveReceivers() const {
 }
 
 void Keyboard::signUpKey(std::unique_ptr<Key> && key) {
-  observators.emplace(key->getKey(), std::move(key));
+  observators.emplace(key->getKey(), std::forward<std::unique_ptr<Key>>(key));
 }
 
 std::istream & operator>>(std::istream & is, Keyboard & obj) {
