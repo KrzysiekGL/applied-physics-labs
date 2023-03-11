@@ -19,7 +19,7 @@ public:
   // Meyers Singleton (constructor)
   static Keyboard & getInstance();
   // Register a receiver for the observer
-  void signUpKey(std::shared_ptr<Key> key);
+   void signUpKey(std::unique_ptr<Key> && key);
   // Check wheter there are any receivers for the observer
   bool haveReceivers() const;
 
@@ -29,7 +29,7 @@ private:
   // Last key pressed on the keyboard
   char keyPressed;
   // List of observators subscribed
-  std::map<char, std::shared_ptr<Key>> observators;
+  std::map<char, std::unique_ptr<Key>> observators;
 };
 
 std::istream & operator>>(std::istream &, Keyboard &);

@@ -6,7 +6,7 @@ class Key {
 public:
   Key(char key) : key(key) {}
   char getKey() const;
+  void activate();
 private:
   char key;
-  void activate();
 };
