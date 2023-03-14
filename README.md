@@ -9,5 +9,5 @@ sudo docker run --rm -it --network host -e DISPLAY=$DISPLAY -v $HOME/.Xauthority
 ```
 For example, using custom image `wp-jupyter`:
 ```bash
-sudo docker run -ti --rm -p 8888:8888 --user 1000:1000 -v "${PWD}":/home/jovyan/work -e DISPLAY=$DISPLAY -v $HOME/.Xauthority:/home/jovyan/.Xauthority -v /tmp/.X11-unix:/tmp/.X11-unix wp-jupyter
+sudo docker run -ti --rm -p 8888:8888 --user 1000:1000 -v "${PWD}":/home/jovyan/work -w /home/jovyan/work -e DISPLAY=$DISPLAY -v $HOME/.Xauthority:/home/jovyan/.Xauthority -v /tmp/.X11-unix:/tmp/.X11-unix wp-jupyter
 ```
