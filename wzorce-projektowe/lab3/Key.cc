@@ -1,10 +1,6 @@
 #include "Key.hpp"
 
-char Key::getKey() const {
-  return key;
-}
-
-void Key::activate() {
-  std::cout << "Key " << getKey() << " activated. Goodbye\n";
+std::string Key::activate() const {
+  return std::string("Key " + std::string(1, getKey()) + " activated. Goodbye");
 }
 

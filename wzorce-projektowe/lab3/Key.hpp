@@ -1,12 +1,14 @@
 #pragma once
 
-#include <iostream>
+#include <string>
 
-class Key {
+#include "KeyInterface.hpp"
+
+class Key : public KeyInterface {
 public:
   Key(char key) : key(key) {}
-  char getKey() const;
-  void activate();
+  char getKey() const override;
+  std::string activate() const override;
 private:
   char key;
 };

@@ -1,10 +1,11 @@
 #pragma once
 
+#include <iostream>
 #include <istream>
 #include <memory>
 #include <map>
 
-#include "Key.hpp"
+#include "KeyInterface.hpp"
 
 class Keyboard {
 private:
@@ -19,7 +20,7 @@ public:
   // Meyers Singleton (constructor)
   static Keyboard & getInstance();
   // Register a receiver for the observer
-   void signUpKey(std::unique_ptr<Key> && key);
+   void signUpKey(std::unique_ptr<KeyInterface> && key);
   // Check wheter there are any receivers for the observer
   bool haveReceivers() const;
 
@@ -29,7 +30,7 @@ private:
   // Last key pressed on the keyboard
   char keyPressed;
   // List of observators subscribed
-  std::map<char, std::unique_ptr<Key>> observators;
+  std::map<char, std::unique_ptr<KeyInterface>> observators;
 };
 
 std::istream & operator>>(std::istream &, Keyboard &);

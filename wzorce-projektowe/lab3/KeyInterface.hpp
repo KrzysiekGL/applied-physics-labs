@@ -1,9 +1,12 @@
 #pragma once
 
+#include <string>
+
 class KeyInterface {
 public:
-	virtual ~KeyInterface() {}
-	virtual void activate() const = delete;
-private:
-	char key;
-}
+  virtual ~KeyInterface() {}
+  virtual std::string activate() const = 0;
+  char getKey() const;
+protected:
+  char key;
+};
