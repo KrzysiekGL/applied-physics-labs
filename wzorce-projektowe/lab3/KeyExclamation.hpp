@@ -7,7 +7,7 @@
 
 class KeyExclamation : public KeyDecorator {
 public:
-  KeyExclamation(std::unique_ptr<KeyInterface> && keyInterface)
-    : KeyDecorator(std::move(keyInterface)) {}
+  KeyExclamation(std::shared_ptr<KeyInterface> k) : KeyDecorator(k) {}
   std::string activate() const override;
 };
+

@@ -6,9 +6,10 @@
 
 class KeyDecorator : public KeyInterface {
 protected:
-  std::unique_ptr<KeyInterface> keyInterface;
+  std::shared_ptr<KeyInterface> keyInterface;
 public:
-  KeyDecorator(std::unique_ptr<KeyInterface> && keyInterface)
-    : keyInterface(std::move(keyInterface)){}
+  KeyDecorator(std::shared_ptr<KeyInterface> keyInterface) : keyInterface(keyInterface) {}
   std::string activate() const override;
+  char getKey() const override;
 };
+
