@@ -1,4 +1,4 @@
-FROM jupyter/datascience-notebook:2023-02-28
+FROM docker.io/jupyter/datascience-notebook:2023-02-28
 
 USER root
 RUN apt-get update --yes &&\
