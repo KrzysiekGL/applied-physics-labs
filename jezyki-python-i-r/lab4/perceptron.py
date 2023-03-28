@@ -301,7 +301,7 @@ class simple_perceptron:
 
                 # Calculate weights change
                 for j in range(self.Nin):
-                    self.weights[j] += 0 
+                    self.weights[j] += -self.learning_rate * self.fp(sumWeighted) * (Yout - Ytrain[i]) * Xtrain[i][j]
                     # ZADANIE (1.5p)
                     # uzupełnić prawą stronę powyższego wzoru na zmianę wagi
                     # (plik theory.pdf, wzór w niebieskiej ramce)
@@ -322,7 +322,7 @@ class simple_perceptron:
                         sumWeighted += self.weights[j]*Xvalid[i][j]
                     Yout = self.f(sumWeighted)
                     sumRMSE_valid += (Yout-Yvalid[i])**2
-                
+
                 RMSE_valid.append(np.sqrt(sumRMSE_valid / len(Xvalid)))
                 print('RMSE (validating set) = {}'.format(RMSE_valid[epoch]))
 

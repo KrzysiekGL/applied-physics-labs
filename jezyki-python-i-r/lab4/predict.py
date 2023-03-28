@@ -4,7 +4,7 @@ import numpy as np
 
 if __name__ == '__main__':
 
-    # Parse the arguments. 
+    # Parse the arguments.
     # They can be also read from a file (@file.par)
     ap = argparse.ArgumentParser(fromfile_prefix_chars='@')
     ap.add_argument('-t', '--testset', help='Path to test dataset',
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # Load previously saved model
     p.load_model(model_filename)
 
-    # Read test data and test the perceptron 
+    # Read test data and test the perceptron
     # with the trained weights
     Xtest,Yexpected = p.read_input_data(test_dataset_filename)
     Yout = p.test(Xtest)
@@ -37,13 +37,12 @@ if __name__ == '__main__':
     for i in range(len(Yout)):
         if "sum" in model_filename:
             # For summation only:
-            print('{:.3f} + {:.3f} = {:.3f} (expected {:.3f})'.format(Xtest[i][0], Xtest[i][1], 
+            print('{:.3f} + {:.3f} = {:.3f} (expected {:.3f})'.format(Xtest[i][0], Xtest[i][1],
                                                                       Yout[i], Yexpected[i]))
         else:
             # General:
             print('obtained: {}, expected: {}'.format(Yout[i], Yexpected[i]))
-            
-            
+
     # Scores: RMSE and R squared score
     sse = sum((np.array(Yexpected) - np.array(Yout))**2)
     tse = (len(Yexpected) - 1) * np.var(Yexpected, ddof=1)
