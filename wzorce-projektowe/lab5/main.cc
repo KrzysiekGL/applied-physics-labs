@@ -16,7 +16,7 @@ struct Vector {
 class SubSumFinderInterface {
 public:
   virtual ~SubSumFinderInterface() {}
-  virtual void findSubSum(Vector && vec) = 0;
+  virtual bool findSubSum(Vector && vec) = 0;
 };
 
 class SubSumFinderBase : public SubSumFinderInterface {
@@ -30,7 +30,7 @@ class SubSumQuadratic : public SubSumFinderBase {
 public:
   SubSumQuadratic() {}
   SubSumQuadratic(std::shared_ptr<SubSumFinderInterface> next) : SubSumFinderBase(next) {}
-  void findSubSum(Vector && vec) override {
+  bool findSubSum(Vector && vec) override {
     // Try to solve the problem in less than 0.1 second (100 ms). Otherwise, forward it to the next.
     std::cout << "Quadratic: I'v got this vector: " << std::hex << &vec << std::dec << std::endl;
 
@@ -49,19 +49,28 @@ public:
     if(std::future_status::ready == f.wait_until(delta_time)) {
       std::cout << "Quadratic: Solved the problem in <= to 100 ms\n";
       vec.maxSubSum = f.get();
-      return;
+      return true;
     }
     else if(next!=NULL) {
       // Forward the problem
       std::cout << "Quadratic: Can't finish it in time; pass\n";
-      next->findSubSum(std::forward<Vector>(vec));
+      return next->findSubSum(std::forward<Vector>(vec));
     }
     // Cease execution and forwarding
     else std::cout << "Quadratic: Can't pass the problem. Leaving unresolved...\n";
+    return false;
  }
 private:
   int quadratic(std::vector<int> vec) {
-    return 0;
+    int max = 0;
+    for(int i=0; i<vec.size(); ++i) {
+      int sum = 0;
+      for(int j=i; j<vec.size(); ++j) {
+	sum += vec.at(j);
+	max = std::max(max, sum);
+      }
+    }
+    return max;
   }
 };
 
@@ -69,7 +78,7 @@ class SubSumLinear : public SubSumFinderBase {
 public:
   SubSumLinear() {}
   SubSumLinear(std::shared_ptr<SubSumFinderInterface> next) : SubSumFinderBase(next) {}
-  void findSubSum(Vector && vec) override {
+  bool findSubSum(Vector && vec) override {
     // Try to solve the problem in less than 0.1 second (100 ms). Otherwise, forward it to the next.
     std::cout << "Linear: I'v got this vector: " << std::hex << &vec << std::dec << std::endl;
 
@@ -88,19 +97,26 @@ public:
     if(std::future_status::ready == f.wait_until(delta_time)) {
       std::cout << "Linear: Solved the problem in <= to 100 ms\n";
       vec.maxSubSum = f.get();
-      return;
+      return true;
     }
     else if(next!=NULL) {
       // Forward the problem
       std::cout << "Linear: Can't finish it in time; pass\n";
-      next->findSubSum(std::forward<Vector>(vec));
+      return next->findSubSum(std::forward<Vector>(vec));
     }
     // Cease execution and forwarding
     else std::cout << "Linear: Can't pass the problem. Leaving unresolved...\n";
+    return false;
   }
 private:
   int linear(std::vector<int> vec) {
-    return 0;
+    int maxsofar = 0;
+    int maxhere = 0;
+    for(int i=0; i<vec.size(); ++i) {
+      maxhere = std::max(maxhere + vec.at(i), 0);
+      maxsofar = std::max(maxsofar, maxhere);
+    }
+    return maxsofar;
   }
 };
 
@@ -135,8 +151,9 @@ int main(int argc, char ** argv, char ** env) {
 #endif /* NO_FUN */
 
   // Find biggest sub sum in the vector
-  ssq->findSubSum(std::forward<Vector>(vec));
-  std::cout << "Main: Biggest sub sum found in the vector: " << vec.maxSubSum << '\n';
+  if(ssq->findSubSum(std::forward<Vector>(vec)))
+    std::cout << "Main: Biggest sub sum found in the vector: " << vec.maxSubSum << '\n';
+  else std::cout << "Main: Couldn't make it in time to find the sub sum in the vector...\n";
 
   return 0;
 }
