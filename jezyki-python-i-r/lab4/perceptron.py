@@ -381,11 +381,26 @@ class simple_perceptron:
     def save_model(self, filename):
         '''
         Saves the perceptron data into a file.
+        Save:
+        - # epochs (int)
+        - learning rate (float)
+        - activation function name (str)
+        - weights (list[float])
         Parameters:
             filename - file name (str)
         Returns:
             None
         '''
+
+        data = {
+            'epochs' : self.epochs,
+            'learning_rate' : self.learning_rate,
+            'activation' : self.activation,
+            'weights' : self.weights.tolist()
+        }
+
+        with open(filename, 'w') as f:
+            yaml.dump(data, f)
 
         # ZADANIE (2p)
         # Opracować i zaimplementować dowolny sposób na zapis parametrów modelu do pliku
@@ -396,11 +411,18 @@ class simple_perceptron:
     def load_model(self, filename):
         '''
         Loads the perceptron data from a file.
+        Load:
+        - weights (list[float])
         Parameters:
             filename - file name (str)
         Returns:
             None
         '''
+
+        with open(filename) as f:
+            loaded = yaml.load(f, Loader=yaml.Loader)
+
+        self.weights = np.array(loaded['weights'])
 
         # ZADANIE (1.5p)
         # Zaimplementować odczyt parametrów modelu z pliku
