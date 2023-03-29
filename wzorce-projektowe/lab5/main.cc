@@ -1,8 +1,12 @@
 #include <iostream>
+#include <ratio>
 #include <utility>
 #include <vector>
 #include <memory>
 #include <random>
+#include <thread>
+#include <future>
+#include <chrono>
 
 struct Vector {
   int maxSubSum;
@@ -27,9 +31,37 @@ public:
   SubSumQuadratic() {}
   SubSumQuadratic(std::shared_ptr<SubSumFinderInterface> next) : SubSumFinderBase(next) {}
   void findSubSum(Vector && vec) override {
-    std::cout << "Quadratic: I'v got this vector: " << std::hex << &vec << std::endl;
-    std::cout << "Can't handle it; pass\n\n";
-    if(next!=NULL) next->findSubSum(std::forward<Vector>(vec));
+    // Try to solve the problem in less than 0.1 second (100 ms). Otherwise, forward it to the next.
+    std::cout << "Quadratic: I'v got this vector: " << std::hex << &vec << std::dec << std::endl;
+
+    std::chrono::system_clock::time_point delta_time =
+      std::chrono::system_clock::now() + std::chrono::milliseconds(100);
+
+    // Make a future that should be available in at most the delta_time
+    std::promise<int> p;
+    std::future<int> f = p.get_future();
+    std::thread([&](std::promise<int> p) {
+      p.set_value_at_thread_exit(quadratic(vec.numbers));
+    }, std::move(p)).detach();
+
+    std::cout << "Quadratic: Wating for 100 ms...\n";
+
+    if(std::future_status::ready == f.wait_until(delta_time)) {
+      std::cout << "Quadratic: Solved the problem in <= to 100 ms\n";
+      vec.maxSubSum = f.get();
+      return;
+    }
+    else if(next!=NULL) {
+      // Forward the problem
+      std::cout << "Quadratic: Can't finish it in time; pass\n";
+      next->findSubSum(std::forward<Vector>(vec));
+    }
+    // Cease execution and forwarding
+    else std::cout << "Quadratic: Can't pass the problem. Leaving unresolved...\n";
+ }
+private:
+  int quadratic(std::vector<int> vec) {
+    return 0;
   }
 };
 
@@ -38,9 +70,37 @@ public:
   SubSumLinear() {}
   SubSumLinear(std::shared_ptr<SubSumFinderInterface> next) : SubSumFinderBase(next) {}
   void findSubSum(Vector && vec) override {
-    std::cout << "Linear: I'v got this vector: " << std::hex << &vec << std::endl;
-    std::cout << "Can't handle it; pass\n\n";
-    if(next!=NULL) next->findSubSum(std::forward<Vector>(vec));
+    // Try to solve the problem in less than 0.1 second (100 ms). Otherwise, forward it to the next.
+    std::cout << "Linear: I'v got this vector: " << std::hex << &vec << std::dec << std::endl;
+
+    std::chrono::system_clock::time_point delta_time =
+      std::chrono::system_clock::now() + std::chrono::milliseconds(100);
+
+    // Make a future that should be available in at most the delta_time
+    std::promise<int> p;
+    std::future<int> f = p.get_future();
+    std::thread([&](std::promise<int> p) {
+      p.set_value_at_thread_exit(linear(vec.numbers));
+    }, std::move(p)).detach();
+
+    std::cout << "Linear: Wating for 100 ms...\n";
+
+    if(std::future_status::ready == f.wait_until(delta_time)) {
+      std::cout << "Linear: Solved the problem in <= to 100 ms\n";
+      vec.maxSubSum = f.get();
+      return;
+    }
+    else if(next!=NULL) {
+      // Forward the problem
+      std::cout << "Linear: Can't finish it in time; pass\n";
+      next->findSubSum(std::forward<Vector>(vec));
+    }
+    // Cease execution and forwarding
+    else std::cout << "Linear: Can't pass the problem. Leaving unresolved...\n";
+  }
+private:
+  int linear(std::vector<int> vec) {
+    return 0;
   }
 };
 
@@ -60,6 +120,7 @@ int main(int argc, char ** argv, char ** env) {
   for(int i=0; i<N; ++i)
     vec.numbers.push_back(dist(rng));
 
+#ifndef NO_FUN
   // Just for fun, print scaled histogram
   for(int i=0; i<21; ++i) {
     std::cout << i-10 << ":\t";
@@ -71,10 +132,11 @@ int main(int argc, char ** argv, char ** env) {
     std::cout << std::endl;
   }
   std::cout << std::endl;
+#endif /* NO_FUN */
 
   // Find biggest sub sum in the vector
   ssq->findSubSum(std::forward<Vector>(vec));
-  std::cout << "Biggest sub sum found in the vector: " << vec.maxSubSum << '\n';
+  std::cout << "Main: Biggest sub sum found in the vector: " << vec.maxSubSum << '\n';
 
   return 0;
 }
