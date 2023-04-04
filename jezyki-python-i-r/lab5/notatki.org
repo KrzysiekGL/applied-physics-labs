@@ -1,0 +1,46 @@
+* TODO Zrobic model dla win czerwonych i dla win bialych
+* TODO Zrobic korelacje Kendala i sprawdiz sobie jak wychodzi
+
+# Notacja na zmienne opisowe kategoryczne
+Mozna podzeli na kategorie (np. red, white) albo przypisac wektory. Np.:
+* red [1 0]
+* white [0 1]
+W celu nie dopuszczenia do faforyzacji ktorejs ze zmiennych.
+
+# Punkty oddalone
+W celu znalezienia punktow oddalonych mozna zastosowac metody
+* IQR (domyslnie w metodzie IQR jest +- 1.5 IQR, ale decyzja nalezy do analityka)
+* 3x sigma
+Mozna je tez zidentyfikowac przy wykresach korelacji zmiennych.
+
+Jezeli jest duzo punktow oddalocnych to trzbea zwrocic szczegolna uwage i zrobic
+pelna analize (z boxplotami itd itp). Punkty oddalone beda model psuly. Nalezy przyjac
+odpowiednie kryterium jak wyrzucac punkty oddalone, jednak moze sie okazac ze spowoduje to
+utrated znaczajcej ilosci posiadanych danych.
+
+# Podzial na grupy/modele
+Jezeli dwie grypy sie widocznie roznia miedzy soba (np. pod wzgledem wartosci srednich), mozna
+rozwazyc wykonanie dwoch modeli. Pokazane na przykaldzie win czerwonych i bialych ze zbioru danych.
+
+# loc/iloc examples
+white_whine.iloc[3:6, 2:8]
+white_whie.loc(3:6, 'clorides':'color'])
+
+# Korelacja pomiedzy predyktorem a zmienna celu
+Zeby sprawdzic czy na podstawie danych predyktorow moge zbudowac model do uzyskania
+danego predyktora, musze sprawdzic czy zachodzi pomiedzy predyktorem a zmienna celu korelacja.
+Na przyklad, korelacja linowa. Jezeli jednak zastosuje korelacje liniowe do wykrywania korelacji
+nieliniowych, to ich nie wykryje.
+
+Np. w korelacji Pearsona: jezeli znajduje wartosci bardzo male (patrz wyklad) to nie ma korelacji
+liniowej.
+* 0 brak korelacji
+* 0-0.25 nedzna korelacja (umowne)
+* 1/-1 korelacja liniowa
+
+Jezlie jakis predyktor jest (silnie) skorelowany z wieksza iloscia (np. 2) zmiennych opisowych,
+to jest to korelacja wyzszego rzedu (np. drugiego rzedu).
+
+Uwaga, jezeli Spearman lepiej wychodzi od Pearsona, to jest to przeslanka, ze korelacja moze
+byc nieliniowa.
+
