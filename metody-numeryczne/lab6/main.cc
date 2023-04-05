@@ -62,14 +62,14 @@ void write_to_csv(std::string file_name, std::string header, std::vector<std::pa
   else {
     s << header << '\n';
     for(auto p : v)
-      s << p.first << ", " << p.second << '\n';
+      s << p.first << "," << p.second << '\n';
     s.close();
   }
 }
 
 int main(int argc, char ** argv, char ** env) {
-  write_to_csv("func1.csv", "t, theta", solve(func1));
-  write_to_csv("func2.csv", "t, theta", solve(func2));
-  write_to_csv("func3.csv", "t, theta", solve(func3));
+  write_to_csv("func1.csv", "t,theta", solve(func1));
+  write_to_csv("func2.csv", "t,theta", solve(func2));
+  write_to_csv("func3.csv", "t,theta", solve(func3));
   return 0;
 }
