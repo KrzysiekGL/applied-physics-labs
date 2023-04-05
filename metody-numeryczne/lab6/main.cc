@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <math.h>
 #include <vector>
@@ -54,11 +55,21 @@ std::vector<std::pair<double, double>> solve(double(*func)(double, double, doubl
   return v;
 }
 
+void write_to_csv(std::string file_name, std::string header, std::vector<std::pair<double, double>> v) {
+  std::fstream s{file_name, s.out};
+  if(!s.is_open())
+    std::cout << "failed to open " <<  file_name << '\n';
+  else {
+    s << header << '\n';
+    for(auto p : v)
+      s << p.first << ", " << p.second << '\n';
+    s.close();
+  }
+}
+
 int main(int argc, char ** argv, char ** env) {
-  for(auto p : solve(func1))
-    std::cout << p.first << "\t" << p.second << std::endl;
-  std::cout << std::endl;
-  // solve(func2);
-  // solve(func3);
+  write_to_csv("func1.csv", "t, theta", solve(func1));
+  write_to_csv("func2.csv", "t, theta", solve(func2));
+  write_to_csv("func3.csv", "t, theta", solve(func3));
   return 0;
 }
