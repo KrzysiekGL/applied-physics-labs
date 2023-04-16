@@ -11,7 +11,7 @@ CREATE TABLE non_player_character (
 	wealth int
 );
 
-CREATE TABLE MAP (
+CREATE TABLE map (
 	map_id int PRIMARY KEY,
 	name varchar(32)
 );
@@ -33,3 +33,15 @@ CREATE TABLE item_ownership_ledger (
 	transaction_price int,
 	transaction_time TIMESTAMP
 );
+
+ALTER TABLE ENTITY_LOCATION ADD CONSTRAINT fk_map_id FOREIGN KEY (map_id) REFERENCES map(map_id);
+
+ALTER TABLE ENTITY_LOCATION ADD CONSTRAINT fk_entity_id_to_player FOREIGN KEY (entity_id) REFERENCES player(player_id);
+
+ALTER TABLE ENTITY_LOCATION ADD CONSTRAINT fk_entity_id_to_npc FOREIGN KEY (entity_id) REFERENCES non_player_character(npc_id);
+
+ALTER TABLE ITEM_OWNERSHIP_LEDGER ADD CONSTRAINT fk_owner_id_to_player FOREIGN KEY (owner_id) REFERENCES player(player_id);
+
+ALTER TABLE ITEM_OWNERSHIP_LEDGER  ADD CONSTRAINT fk_owner_id_to_npc FOREIGN KEY (owner_id) REFERENCES non_player_character(npc_id);
+
+ALTER TABLE ITEM_OWNERSHIP_LEDGER  ADD CONSTRAINT fk_item_id FOREIGN KEY (item_id) REFERENCES item(item_id);
