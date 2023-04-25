@@ -54,3 +54,9 @@ koreleacja nieliniowa.
 
 ** Korelcja Nieliniowa
 - ΦK (Phi-K)
+
+* Uwagi do Raportu
+- rozwazyc hiperparametry
+- zwrocic szczegolna uwage na balans przy podziale (danych) przy klasyfikacji
+  - np. zmniejszysc liczebnosc wiekszje gropy i jednoczesnie zwiekszysc liczenosc
+    mniejsziej grupy (patrz np. SMOTE)
