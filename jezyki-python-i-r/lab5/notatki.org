@@ -1,23 +1,23 @@
-* TODO Zrobic model dla win czerwonych i dla win bialych
-* TODO Zrobic korelacje Kendala i sprawdiz sobie jak wychodzi
-* TODO Dolozyc do image wp-jupyter pakiet pythonowy ydata-profiling
+* TODO Zrobić model dla win czerwonych i dla win białych
+* TODO Zrobić korelacje Kendalla i sprawdzić sobie jak wychodzi
+* TODO Dołożyć do image wp-jupyter pakiet pythonowy ydata-profiling
 
 * Notacja na zmienne opisowe kategoryczne
-Mozna podzeli na kategorie (np. red, white) albo przypisac wektory. Np.:
+Można podzielić na kategorie (np. red, white) albo przypisać wektory. Np.:
 - red [1 0]
 - white [0 1]
-W celu nie dopuszczenia do faforyzacji ktorejs ze zmiennych.
+W celu nie dopuszczenia do faworyzacji którejś ze zmiennych.
 
 * Punkty oddalone
-W celu znalezienia punktow oddalonych mozna zastosowac metody
-- IQR (domyslnie w metodzie IQR jest +- 1.5 IQR, ale decyzja nalezy do analityka)
+W celu znalezienia punktów oddalonych można zastosować metody
+- IQR (domyślnie w metodzie IQR jest +- 1.5 IQR, ale decyzja należny do analityka)
 - 3x sigma
-Mozna je tez zidentyfikowac przy wykresach korelacji zmiennych.
+Można je tez zidentyfikować przy wykresach korelacji zmiennych.
 
-Jezeli jest duzo punktow oddalocnych to trzbea zwrocic szczegolna uwage i zrobic
-pelna analize (z boxplotami itd itp). Punkty oddalone beda model psuly. Nalezy przyjac
-odpowiednie kryterium jak wyrzucac punkty oddalone, jednak moze sie okazac ze spowoduje to
-utrated znaczajcej ilosci posiadanych danych.
+Jeżeli jest dożo punktów oddalonych to trzeba zwrócić szczególną uwagę i zrobić
+pełna analizę (z box-plotami itd itp). Punkty oddalone będą model psuły. Należy przyjąć
+odpowiednie kryterium jak wyrzucać punkty oddalone, jednak może się okazać ze spowoduje to
+utrata znaczącej ilości posiadanych danych.
 
 * Podzial na grupy/modele
 Jezeli dwie grypy sie widocznie roznia miedzy soba (np. pod wzgledem wartosci srednich), mozna
@@ -54,6 +54,18 @@ koreleacja nieliniowa.
 
 ** Korelcja Nieliniowa
 - ΦK (Phi-K)
+
+* Standaryzacja/Normalizacja
+Pzy modelach regresyjnych (przy regresji liniowej) standaryzacja oraz normalizacja
+nic nie wprowadza do modelu, to znaczy nie zmienia go (nie polepsza!).
+
+* Redukcja wymiarow problemun
+Model chcemy miec mozliwe maly. Zawsze chcemy zmniejszyc liczbe predyktorow (jezeli sie da).
+Po redukcji predyktorow model moze sie pogorszyc. Naleyz rozwazyc pogorszenie i stwierdzic
+czy pogorszenie jest zbyt kosztowne, czy mozna jednak dokonac redukcji predyktora.
+
+Jezeli po redukcji model znacznie sie pogorszy, a rozwazam regresje liniowa, to moze
+to oznaczac, ze zachodza korelajcje nieliniowe (moze to wyjsc przy korelacji PhiK).
 
 * Uwagi do Raportu
 - rozwazyc hiperparametry
