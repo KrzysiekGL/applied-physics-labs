@@ -13,9 +13,10 @@ public class DemoApplication {
 
 	ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
 
-	//DebitCard dc = new DebitCard(ctx.getBean(Address.class));
-	DebitCard dc = new DebitCard(ctx.getBean("addressSpec", Address.class));
-	System.out.println("Debit card info: "+dc.info());
+	TreesCollection tc = ctx.getBean(TreesCollection.class);
+	tc.addTree(ctx.getBean("treeOak", Tree.class));
+	tc.addTree(ctx.getBean("treePine", Tree.class));
+	System.out.println(tc.info());
     }
 }
 
