@@ -18,10 +18,10 @@ public class DemoApplication {
 	//DebitCard dcard = (DebitCard)ctn.getBean("dcard");
 	//dcard.details();
 
-	ApplicationContext ctx = new AnnotationConfigApplicationContext(AddressConfig.class);
+	ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
 
-	Address address = ctx.getBean(Address.class);
-	System.out.println("Name: "+address.getName()+" City: "+address.getCity());
+	DebitCard dc = ctx.getBean(DebitCard.class);
+	System.out.println("Debit card info: "+dc.info());
     }
 }
 

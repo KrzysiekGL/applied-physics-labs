@@ -6,7 +6,7 @@ public class DebitCard {
     public DebitCard() {}
 
     public DebitCard(Address address) {
-	System.out.println("Hitting Constructor");
+	System.out.println("DebitCard::constructor");
 	this.address = address;
     }
 
@@ -15,12 +15,12 @@ public class DebitCard {
     }
 
     public void setAddress(Address address) {
-	System.out.println("Hitting setter method");
+	System.out.println("DebitCard::setAddress");
 	this.address = address;
     }
 
-    public void details() {
-	System.out.println("This is Debit Card and address is: " + address.city);
+    public String info() {
+	return (String)("DC name: "+address.getName()+" DC city: "+address.getCity());
     }
 }
 
