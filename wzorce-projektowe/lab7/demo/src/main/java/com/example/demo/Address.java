@@ -1,6 +1,11 @@
 package com.example.demo;
 
-public class Address{
+interface IAddress {
+    public String getName();
+    public String getCity();
+}
+
+public class Address implements IAddress {
     public String name;
     public String city;
 

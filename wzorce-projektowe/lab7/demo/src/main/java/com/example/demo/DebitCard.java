@@ -1,20 +1,21 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class DebitCard {
-    public Address address;
+    public IAddress address;
 
-    public DebitCard() {}
-
-    public DebitCard(Address address) {
+    @Autowired
+    public DebitCard(IAddress address) {
 	System.out.println("DebitCard::constructor");
 	this.address = address;
     }
 
-    public Address getAddress() {
+    public IAddress getAddress() {
 	return address;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(IAddress address) {
 	System.out.println("DebitCard::setAddress");
 	this.address = address;
     }

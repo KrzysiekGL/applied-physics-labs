@@ -9,8 +9,9 @@ public class AppConfig {
 	return new Address("Jan", "Gdansk");
     }
 
-    @Bean DebitCard debitCard() {
-	return new DebitCard(address());
+    @Bean
+    public Address addressSpec() {
+	return new Address("Niemoc", "Mniedopada");
     }
 }
 
