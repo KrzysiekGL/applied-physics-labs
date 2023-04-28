@@ -1,0 +1,7 @@
+#+title: Raport o DI/IoC
+#+author: Krzysztof Szczerbowski
+
+* Framework
+Wykorzystany framework do zrealizowania wzorca projektowego Dependency Injections
+to Spring. Boilerplate projekt został wygenerowany przy pomocy [[https://start.spring.io/][Spring Initializr]].
+Budowa projektu została wykonana zgodnie z instrukcjami [[https://spring.io/quickstart][Quickstart guide]].
