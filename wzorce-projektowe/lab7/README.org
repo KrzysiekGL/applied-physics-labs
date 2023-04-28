@@ -5,3 +5,10 @@
 Wykorzystany framework do zrealizowania wzorca projektowego Dependency Injections
 to Spring. Boilerplate projekt został wygenerowany przy pomocy [[https://start.spring.io/][Spring Initializr]].
 Budowa projektu została wykonana zgodnie z instrukcjami [[https://spring.io/quickstart][Quickstart guide]].
+
+* Konfiguracja
+Funkcjonalność IoC (Inversion of Control) zaimplementowana jako DI (Dependency Injection),
+zrealizowana przy pomocy frameworku Spring, została skonfigurowana w następujący sposób:
+- `AppConfig.java` plik do konfiguracji kontenera Beans Sprig
+- `context.getBean()` metoda do pozyskiwania instancji obiektów (implementacji) `ITree`
+  wstrzykiwanych do `ArrayList<ITree>` przechowywanej wewnątrz obiektu `TreesCollection`
