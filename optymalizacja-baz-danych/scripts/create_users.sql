@@ -4,6 +4,7 @@ create or replace NONEDITIONABLE procedure create_users as
   created_at timestamp;
   wealth number(38);
   last_pk number(38,0);
+  cnt number;
 begin
   --dbms_output.enable();
   --dbms_output.put_line('Create users procedure');
@@ -13,7 +14,13 @@ begin
   dbms_random.initialize(rseed);
 
   -- determine last pk if ther is any
-  select max(player_id) into last_pk from player;
+  select count(*) into cnt from player;
+  if(cnt = 0)
+  then
+    select 0 into last_pk from dual;
+  else
+    select max(player_id) into last_pk from player;
+  end if;
   --dbms_output.put_line('Last player_id: '||last_pk);
 
   -- random player (player_id, name, created_at, wealth)
