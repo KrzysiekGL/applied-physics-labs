@@ -2,6 +2,18 @@
 #include <vector>
 #include <cmath>
 
+std::vector<double> sub(std::vector<double> & A, double lambda) {
+  std::vector<double> m;
+  int side = std::sqrt(A.size());
+
+  m = A;
+  for(int i=0; i<side; ++i) {
+    m.at(i*side+i) -= lambda;
+  }
+
+  return m;
+}
+
 double det(std::vector<double> & matrix, int iteration=0, double D_jm1=0, double D_jm2=0) {
   double D_j;
   int side = std::sqrt(matrix.size());
@@ -24,6 +36,28 @@ double det(std::vector<double> & matrix, int iteration=0, double D_jm1=0, double
 }
 
 int main(int argc, char ** argv, char ** env) {
+  const double T = 1.0, L=1.0, h=0.01, N=100, mu = 1.0;
+  std::vector<double> A;
+
+  for(int i=0; i<N; ++i)
+    for(int j=0; j<N; ++j)
+      A.push_back(0);
+
+  for(int i=0; i<N; ++i) {
+    if(i==0) {
+      A.at(0) = 2*T/mu;
+      A.at(1) = -T/mu;
+    }
+    else if(i==N-1) {
+      A.at(i*N+i) = 2*T/mu;
+      A.at(i*N+i-1) = -T/mu;
+    }
+    else {
+      A.at(i*N+i-1) = -T/mu;
+      A.at(i*N+i) = 2*T/mu;
+      A.at(i*N+i-1) = -T/mu;
+    }
+  }
 
   return 0;
 }
