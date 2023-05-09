@@ -1,0 +1,74 @@
+* TODO Zrobić model dla win czerwonych i dla win białych
+* TODO Zrobić korelacje Kendalla i sprawdzić sobie jak wychodzi
+* TODO Dołożyć do image wp-jupyter pakiet pythonowy ydata-profiling
+
+* Notacja na zmienne opisowe kategoryczne
+Można podzielić na kategorie (np. red, white) albo przypisać wektory. Np.:
+- red [1 0]
+- white [0 1]
+W celu nie dopuszczenia do faworyzacji którejś ze zmiennych.
+
+* Punkty oddalone
+W celu znalezienia punktów oddalonych można zastosować metody
+- IQR (domyślnie w metodzie IQR jest +- 1.5 IQR, ale decyzja należny do analityka)
+- 3x sigma
+Można je tez zidentyfikować przy wykresach korelacji zmiennych.
+
+Jeżeli jest dożo punktów oddalonych to trzeba zwrócić szczególną uwagę i zrobić
+pełna analizę (z box-plotami itd itp). Punkty oddalone będą model psuły. Należy przyjąć
+odpowiednie kryterium jak wyrzucać punkty oddalone, jednak może się okazać ze spowoduje to
+utrata znaczącej ilości posiadanych danych.
+
+* Podzial na grupy/modele
+Jezeli dwie grypy sie widocznie roznia miedzy soba (np. pod wzgledem wartosci srednich), mozna
+rozwazyc wykonanie dwoch modeli. Pokazane na przykaldzie win czerwonych i bialych ze zbioru danych.
+
+* loc/iloc examples
+white_whine.iloc[3:6, 2:8]
+white_whie.loc(3:6, 'clorides':'color'])
+
+* Korelacja pomiedzy predyktorem a zmienna celu
+Zeby sprawdzic czy na podstawie danych predyktorow moge zbudowac model do uzyskania
+danego predyktora, musze sprawdzic czy zachodzi pomiedzy predyktorem a zmienna celu korelacja.
+Na przyklad, korelacja linowa. Jezeli jednak zastosuje korelacje liniowe do wykrywania korelacji
+nieliniowych, to ich nie wykryje.
+
+Np. w korelacji Pearsona: jezeli znajduje wartosci bardzo male (patrz wyklad) to nie ma korelacji
+liniowej:
+- 0 brak korelacji
+- 0-0.25 nedzna korelacja (umowne)
+- 1/-1 korelacja liniowa
+
+Jezlie jakis predyktor jest (silnie) skorelowany z wieksza iloscia (np. 2) zmiennych opisowych,
+to jest to korelacja wyzszego rzedu/stopnia (np. drugiego rzedu/stopnia).
+
+Uwaga, jezeli Spearman lepiej wychodzi od Pearsona, to jest to przeslanka, ze korelacja moze
+byc nieliniowa.
+
+** Korelacja Liniowa
+- Pearons
+- Cramer
+Jezeli korelacja jest nieliniowa, to korelacja liniowa moze wyjsc zerowa albo bardzo niska.
+Nalezy zastosowac jeszcze korelacje nielioniowa, zeby sprawdzic czy mimo to nie wystepuje
+koreleacja nieliniowa.
+
+** Korelcja Nieliniowa
+- ΦK (Phi-K)
+
+* Standaryzacja/Normalizacja
+Pzy modelach regresyjnych (przy regresji liniowej) standaryzacja oraz normalizacja
+nic nie wprowadza do modelu, to znaczy nie zmienia go (nie polepsza!).
+
+* Redukcja wymiarow problemun
+Model chcemy miec mozliwe maly. Zawsze chcemy zmniejszyc liczbe predyktorow (jezeli sie da).
+Po redukcji predyktorow model moze sie pogorszyc. Naleyz rozwazyc pogorszenie i stwierdzic
+czy pogorszenie jest zbyt kosztowne, czy mozna jednak dokonac redukcji predyktora.
+
+Jezeli po redukcji model znacznie sie pogorszy, a rozwazam regresje liniowa, to moze
+to oznaczac, ze zachodza korelajcje nieliniowe (moze to wyjsc przy korelacji PhiK).
+
+* Uwagi do Raportu
+- rozwazyc hiperparametry
+- zwrocic szczegolna uwage na balans przy podziale (danych) przy klasyfikacji
+  - np. zmniejszysc liczebnosc wiekszje gropy i jednoczesnie zwiekszysc liczenosc
+    mniejsziej grupy (patrz np. SMOTE)
