@@ -15,14 +15,11 @@ double theta_dot(double t, double theta_0=1.0, double g_over_l=1.0) {
 }
 
 // Second order DE -- paramteres embeded inside
-// double func(double t, double y1, double y2,
-// 	    double g_over_l=1.0, double q=0.5, double a=0.9, double omega_0=0.48)
-// {
-//   // in radians per second^2
-//   return -q*y2 - g_over_l*std::sin(y1) + a*std::cos(omega_0*t);
-// }
-double func(double x, double y1, double y2) {
-  return -4.0*y1;
+double func(double t, double y1, double y2,
+	    double g_over_l=1.0, double q=0.5, double a=0.9, double omega_0=0.48)
+{
+  // in radians per second^2
+  return -q*y2 - g_over_l*std::sin(y1) + a*std::cos(omega_0*t);
 }
 
 // Solution
@@ -62,20 +59,18 @@ void solve(const double H=0.05, const double span=10.0) {
 
   // Print the results; compare along the analytical solution
   std::cout << "Solution (err is abs(analytical - numerical)):\n";
-  std::cout << "t, y1, (a)y1, err_y1, y2, (a)y2, err_y2\n";
+  std::cout << "t,y1,a_y1,err_y1,y2,a_y2,err_y2\n";
   for(int i=0; i<N; ++i) {
     const double T = t.at(i);
     const double y1 = Y.at(i).at(0);
-    //const double a_y1 = theta(T);
     const double a_y1 = std::cos(2*T);
     const double err_y1 = std::fabs(a_y1 - y1);
     const double y2 = Y.at(i).at(1);
-    //const double a_y2 = theta_dot(T);
     const double a_y2 = -2*std::sin(2*T);
     const double err_y2 = std::fabs(a_y2 - y2);
-    std::cout << T << ", "
-	      << y1 << ", " << a_y1 << ", " << err_y1 << ", "
-	      << y2 << ", " << a_y2 << ", " << err_y2 << '\n';
+    std::cout << T << ","
+	      << y1 << "," << a_y1 << "," << err_y1 << ","
+	      << y2 << "," << a_y2 << "," << err_y2 << '\n';
   }
 }
 
