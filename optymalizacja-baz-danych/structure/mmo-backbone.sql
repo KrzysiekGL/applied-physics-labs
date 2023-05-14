@@ -50,6 +50,14 @@ alter table entity_location add constraint el_fk_map
     references map(map_id)
 ;
 
+alter table entity_location add constraint el_unique_player
+    unique(player_id)
+;
+
+alter table entity_location add constraint el_unique_npc
+    unique(npc_id)
+;
+
 -- test
 select count(*) from player;
 select count(*) from non_player_character;
