@@ -49,6 +49,22 @@ alter table entity_location add constraint el_fk_map
     foreign key (map_id)
     references map(map_id)
 ;
+
+-- test
+select count(*) from player;
+select count(*) from non_player_character;
+select count(*) from map;
+select count(*) from entity_location;
+describe entity_location;
+
+insert into entity_location values(10100, NULL, 64);
+insert into entity_location values(NULL, 240, 4);
+insert into entity_location values(10100, 12, 64);
+insert into entity_location values(NULL, NULL, 13);
+insert into entity_location values(10, NULL, NULL);
+
+select * from entity_location;
+truncate table entity_location;
 -- Entity location ---------------------------------------
 
 
@@ -59,14 +75,37 @@ CREATE TABLE [item] (
 )
 GO
 
-CREATE TABLE [item_ownership_ledger] (
-  [player_id] int,
-  [npc_id] int,
-  [item_id] int,
-  [price] int,
-  [tansaction_time] timestamp
-)
-GO
+-- Item Ownership Ledger ---------------------------------------
+create table item_ownership_ledger (
+    player_id number(38, 0),
+    npc_id number(38, 0),
+    item_id number(38, 0),
+    price number(38, 0),
+    transaction_time timestamp(6)
+);
+
+alter table item_ownership_ledger add constraint iol_not_null_item
+    check (item_id is not null)
+;
+
+alter table item_ownership_ledger add constraint iol_not_null_player check
+    (player_id is not null)
+;
+
+alter table item_ownership_ledger add constraint iol_not_null_npc check
+    (npc_id is not null)
+;
+
+alter table item_ownership_ledger add constraint iol_fk_player
+    foreign key (player_id)
+    references player(player_id)
+;
+
+alter table item_ownership_ledger add constraint iol_fk_npc
+    foreign key (npc_id)
+    references non_player_character(npc_id)
+;
+-- Item Ownership Ledger ---------------------------------------
 
 ALTER TABLE [item_ownership_ledger] ADD FOREIGN KEY ([item_id]) REFERENCES [item] ([item_id])
 GO
