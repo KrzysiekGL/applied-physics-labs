@@ -1,4 +1,4 @@
-FROM docker.io/jupyter/datascience-notebook:2023-02-28
+FROM docker.io/jupyter/datascience-notebook:python-3.10
 
 USER root
 RUN apt-get update --yes &&\
@@ -7,3 +7,4 @@ RUN apt-get update --yes &&\
 
 USER ${NB_UID}
 RUN python -m pip install --upgrade opencv-python ydata-profiling
+WORKDIR /home/jovyan/work
