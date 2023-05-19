@@ -6,7 +6,7 @@ class Originator {
 public:
   class Memento {
   public:
-    Memento(Originator && originator);
+    Memento(Originator * originator);
     void restore();
   private:
     Originator * originator;
