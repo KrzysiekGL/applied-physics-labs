@@ -1,8 +1,9 @@
-#include "Originator.hpp"
 #include <memory>
 
+#include "Originator.hpp"
+
 std::unique_ptr<Originator::Memento> Originator::createMemento() {
-  return std::move(std::make_unique<Memento>(Memento(this)));
+  return std::move(std::make_unique<Memento>(this));
 }
 
 void Originator::alterFields() {

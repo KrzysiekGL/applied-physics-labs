@@ -2,12 +2,14 @@
 
 #include <memory>
 
+#include "IMemento.hpp"
+
 class Originator {
 public:
-  class Memento {
+  class Memento : public IMemento {
   public:
     Memento(Originator * originator);
-    void restore();
+    void restore() override;
   private:
     Originator * originator;
     int field1;
