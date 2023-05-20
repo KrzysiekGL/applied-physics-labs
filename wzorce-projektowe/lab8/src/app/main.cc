@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -8,7 +9,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "BoxWindow.hpp"
+#include "Application.hpp"
 
 static void glfw_error_callback(int error, const char * description) {
   std::cerr << "GLFW Error " << error << ": " << description << '\n';
@@ -49,7 +50,14 @@ int main(int argc, char ** argv, char ** env) {
 
   // Our state
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-  BoxWindow myWindow("My window");
+
+  // Application backbone
+  Application & application = Application::getInstance();
+  const uint numberOfWindows = argc>1 ? std::atoi(argv[1]) : 2;
+  for(int i=0; i<numberOfWindows; ++i) {
+    std::string windowName = "Window " + std::to_string(i+1);
+    application.addBoxWindow(windowName.c_str());
+  }
 
   // Main loop
   while(!glfwWindowShouldClose(window)) {
@@ -61,8 +69,8 @@ int main(int argc, char ** argv, char ** env) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Some ImGui stuff
-    myWindow.show();
+    // Application's windows
+    application.showWindows();
 
     // Rendering
     ImGui::Render();
