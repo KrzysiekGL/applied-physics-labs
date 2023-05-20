@@ -1,12 +1,14 @@
-#include <GL/gl.h>
-#include <cstdio>
 #include <iostream>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <GL/gl.h>
+
 #include <GLFW/glfw3.h>
+
+#include "BoxWindow.hpp"
 
 static void glfw_error_callback(int error, const char * description) {
   std::cerr << "GLFW Error " << error << ": " << description << '\n';
@@ -46,9 +48,8 @@ int main(int argc, char ** argv, char ** env) {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Our state
-  bool show_demo_window = true;
-  bool show_another_window = false;
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  BoxWindow myWindow("My window");
 
   // Main loop
   while(!glfwWindowShouldClose(window)) {
@@ -60,35 +61,8 @@ int main(int argc, char ** argv, char ** env) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // 1. Show the big demo window
-    if(show_demo_window)
-      ImGui::ShowDemoWindow(&show_demo_window);
-
-    // 2. Show a smiple window that we create ourselves. Use Begin/End pair
-    {
-      static float f = 0.0f;
-      static int counter = 0;
-
-      ImGui::Begin("Hello, World!");
-
-      ImGui::Text("This is some useful text.");
-
-      ImGui::Checkbox("Demo Window", &show_demo_window);
-
-      ImGui::Checkbox("Another Window", &show_another_window);
-
-      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-
-      ImGui::ColorEdit3("clear color", (float*)&clear_color);
-
-      if(ImGui::Button("Button"))
-	counter++;
-
-      ImGui::SameLine();
-      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-		  1000.f/io.Framerate, io.Framerate);
-      ImGui::End();
-    }
+    // Some ImGui stuff
+    myWindow.show();
 
     // Rendering
     ImGui::Render();

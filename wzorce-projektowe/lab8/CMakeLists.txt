@@ -35,7 +35,10 @@ add_executable(hello-memento ${MEMENTO_SRCS})
 include(FindOpenGL)
 
 # The app - Command and Memento
-file(GLOB_RECURSE APP_SRCS ./src/app/*.cc ./src/app/*.cpp)
+file(GLOB_RECURSE APP_SRCS
+  ./src/app/*.cc
+  ./src/app/*.cpp
+)
 add_executable(app ${APP_SRCS})
 target_include_directories(app PRIVATE
   ${OPENGL_INCLUDE_DIR}
