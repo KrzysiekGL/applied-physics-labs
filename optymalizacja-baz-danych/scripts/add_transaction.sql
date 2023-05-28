@@ -1,3 +1,20 @@
+-- Próby wykonania transakcji w pętli:
+create or replace NONEDITIONABLE procedure convey_transactions as
+    in_seed number;
+begin
+  dbms_output.enable();
+
+  for i in 1 .. 1000
+  loop
+    BEGIN
+        in_seed := i;
+        ADD_TRANSACTION(in_seed => in_seed);
+        commit;
+    END;
+  end loop;
+
+end convey_transactions;
+
 create or replace NONEDITIONABLE procedure add_transaction as
     rseed number(20);
     r_player_id number(38, 0);

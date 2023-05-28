@@ -1,0 +1,74 @@
+#+title: Raport - Optymalizacja Baz Danych
+#+subtitle: Wirtualny rynek graczy i postaci niezależnych
+#+author: Krzysztof Szczerbowski
+
+* Struktura bazy danych
+Przyjęta struktura bazy danych została zaprezentowana na poniższej ilustracji:
+#+attr_html: :rotation 90
+[[./structure/mmo-backbone.png]]
+
+* Generowanie danych
+Elementy tablic ~map~, ~player~, ~non_player_character~, oraz ~item~ zostały wygenerowane na
+podstawie liczb pseudo losowych. Elementy tablic ~entity_location~ i ~item_ownership_ledger~
+zostały wygenerowane na podstawie danych z wyżej wymienionych tablic.
+
+** ~map~
+#+include: ./scripts/create_maps.sql src
+
+** ~player~
+#+include: ./scripts/create_users.sql src
+
+** ~non_player_character~
+#+include: ./scripts/create_npcs.sql src
+
+** ~item~
+#+include: ./scripts/create_items.sql src
+
+** ~entity_location~
+Elementy tablicy ~entity_location~ zawierają informację o zależności (położeniu)
+danych z tablic ~player~ oraz ~non_player_character~ i dane te posiadają rozkład normalny.
+#+include: ./scripts/populate_location.sql src
+
+** ~item_ownership_ledger~
+Elementy tablic ~item_ownership_ledger~ zostały wygenerowane w następujący sposób:
+#+include: ./scripts/add_transaction.sql src
+
+* Zapytania
+Na podstawie tak wygenerowanych danych zostały przygotowane trzy zapytania.
+
+** Przedmioty gracza
+Pierwsze zapytanie zostało ograniczone do złożonej instrukcji ~select~.
+Zapytanie odpowiada na pytanie /jakie przedmioty posiada (pseudo) losowo wybrany gracz
+na podstawie informacji zawartych w/ [[*~item_ownership_ledger~][~item_ownership_ledger~]] /?/
+#+include: ./queries/player_items.sql src
+
+** Transakcje wybranej postaci niezależnej
+Drugie zapytanie zostało przygotowane w postaci procedury korzystającej z globalnej
+tablicy tymczasowej. Dane, z których korzysta zapytanie, pochodzą z tablicy [[*~item_ownership_ledger~][~item_ownership_ledger~]].
+Zapytanie odpowiada na pytanie /jakich oraz w jakiej ilości transakcji dokonała wybrana/
+/postać niezależna z pozostałymi graczami, oraz jaka była data pierwszej i ostatniej każdej z
+przeprowadzonych transakcji w zależności od danego gracza?/
+#+include: ./queries/npc_transactions.sql src
+
+** Ranking postaci niezależnych
+Trzecie zapytanie, przygotowane w postaci procedury, korzysta z drugiego zapytania,
+[[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]. Na podstawie informacji z drugie zapytania, wykonanego
+dla każdej z postaci niezależnych, odpowiada na pytanie /która z postaci niezależnych wykonała
+najwięcej trakcji, oraz która z postaci niezależnych dokonała transakcje na największą sumę?/
+#+include: ./queries/npc_ranking.sql src
+
+* /Hot-spots/ miejsca do potencjalnej optymalizacji
+Bloki kodu, które zajeły najwięcej czasu na wykonanie to
+- [[*~item_ownership_ledger~][~item_ownership_ledger~]]
+- [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]
+Bloki te zostaną podanne dalszej analizie oraz zostanie przypuszczona próba ich optymalizacji
+albo ulepszenia względem czasu wykonania, gdzie im któtszy czas wykonania, tym lepszy rezultat.
+
+* Plany zapytań
+Niżej przedsatiowono plany zapytań dla każdego z bloków poddannych analizie
+
+** [[*~item_ownership_ledger~][~item_ownership_ledger~]]
+
+** [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]
+
+* Poprawione bloki kodu
