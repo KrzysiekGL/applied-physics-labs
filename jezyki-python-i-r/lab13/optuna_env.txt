@@ -1,0 +1,23 @@
+#How to create new env in conda
+#The case of Optuna package
+
+#env creation step by step
+
+conda create --name optuna_env
+
+conda activate optuna_env
+
+conda install -n optuna_env -c conda-forge optuna
+
+conda install -n optuna_env -c conda-forge notebook
+
+#just run JP
+jupyter notebook
+
+#and we will check if env is OK
+
+conda install -n optuna_env -c conda-forge pandas
+
+conda install -n optuna_env -c conda-forge scikit-learn
+
+conda install -n optuna_env -c plotly plotly
