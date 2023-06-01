@@ -6,5 +6,5 @@ RUN apt-get update --yes &&\
 		apt-get clean && rm -rf /var/lib/apt/lists/*
 
 USER ${NB_UID}
-RUN python -m pip install --upgrade opencv-python ydata-profiling optuna plotly
+RUN python -m pip install --upgrade opencv-python ydata-profiling optuna plotly missingno
 WORKDIR /home/jovyan/work
