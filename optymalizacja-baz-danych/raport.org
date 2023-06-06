@@ -25,8 +25,8 @@ zostały wygenerowane na podstawie danych z wyżej wymienionych tablic.
 #+include: ./scripts/create_items.sql src
 
 ** ~entity_location~
-Elementy tablicy ~entity_location~ zawierają informację o zależności (położeniu)
-danych z tablic ~player~ oraz ~non_player_character~ i dane te posiadają rozkład normalny.
+Elementy tablicy ~entity_location~ zawierały informację o zależności (położeniu)
+danych z tablic ~player~ oraz ~non_player_character~ i dane te posiadały rozkład normalny.
 #+include: ./scripts/populate_location.sql src
 
 ** ~item_ownership_ledger~
@@ -44,31 +44,109 @@ na podstawie informacji zawartych w/ [[*~item_ownership_ledger~][~item_ownership
 
 ** Transakcje wybranej postaci niezależnej
 Drugie zapytanie zostało przygotowane w postaci procedury korzystającej z globalnej
-tablicy tymczasowej. Dane, z których korzysta zapytanie, pochodzą z tablicy [[*~item_ownership_ledger~][~item_ownership_ledger~]].
-Zapytanie odpowiada na pytanie /jakich oraz w jakiej ilości transakcji dokonała wybrana/
+tablicy tymczasowej. Dane, z których korzystało zapytanie, pochodziły z tablicy [[*~item_ownership_ledger~][~item_ownership_ledger~]].
+Zapytanie odpowiadało na pytanie /jakich oraz w jakiej ilości transakcji dokonała wybrana/
 /postać niezależna z pozostałymi graczami, oraz jaka była data pierwszej i ostatniej każdej z
 przeprowadzonych transakcji w zależności od danego gracza?/
 #+include: ./queries/npc_transactions.sql src
 
 ** Ranking postaci niezależnych
-Trzecie zapytanie, przygotowane w postaci procedury, korzysta z drugiego zapytania,
-[[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]. Na podstawie informacji z drugie zapytania, wykonanego
-dla każdej z postaci niezależnych, odpowiada na pytanie /która z postaci niezależnych wykonała
+Trzecie zapytanie, przygotowane w postaci procedury, korzystało z drugiego zapytania,
+[[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]. Na podstawie odpowiedzi z drugiego zapytania, wykonanego
+dla każdej z postaci niezależnych, odpowiadało na pytanie /która z postaci niezależnych wykonała
 najwięcej trakcji, oraz która z postaci niezależnych dokonała transakcje na największą sumę?/
 #+include: ./queries/npc_ranking.sql src
 
 * /Hot-spots/ miejsca do potencjalnej optymalizacji
-Bloki kodu, które zajeły najwięcej czasu na wykonanie to
-- [[*~item_ownership_ledger~][~item_ownership_ledger~]]
-- [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]
-Bloki te zostaną podanne dalszej analizie oraz zostanie przypuszczona próba ich optymalizacji
-albo ulepszenia względem czasu wykonania, gdzie im któtszy czas wykonania, tym lepszy rezultat.
+Bloki kodu, które wykonanie zajeło najwięcej czasu to
+- [[*~item_ownership_ledger~][~item_ownership_ledger~]], procedura ~add_transaction~ około $0.28$ sekundy
+- [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]], prcedura ~npc_transactions_query~ około $1.14$ sekundy
+Bloki te zostały podanne dalszej analizie oraz przypuszczono próbę optymalizacji
+albo zmniejszenia czasu wykonania zapytań znajdujących się wewnątrz bloków.
 
 * Plany zapytań
-Niżej przedsatiowono plany zapytań dla każdego z bloków poddannych analizie
+Niżej przedsatiowono plany zapytań dla każdego z bloków poddannych analizie.
+Ze względu na brak możliwość sporządzenia całościowego planu zapytań dla procedury per se,
+zostały wykonane oraz przedstawione plany wszystkich zapytań składające się na daną procedurę/blok
+kodu. Ze względu na to, że zapytania zostały wykonane pojedynczo przy wykorzystaniu bezpośrednich
+zapytań do bazy danych, pominięto w zapytaniach polecenia służące do zapisywania odpowiedzi.
+Wartości odpowiedzi z zapytań, które zostały wykorzystane w zapytaniach nasępujących zastąpiono
+wartościami stałymi.
 
-** [[*~item_ownership_ledger~][~item_ownership_ledger~]]
+** [[*~item_ownership_ledger~][~item_ownership_ledger~]], procedura ~add_transaction~
+#+begin_src
+select to_number(to_char(sysdate, 'sssss')) from dual;
+#+end_src
+#+include: ./explain_plan/add_transaction/rseed.html
 
-** [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]
+#+begin_src
+select item_id,name from item where item_type != 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/tmp_item.html
+
+#+begin_src
+select item_id from tmp_item where rownum = 1;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_item_id.html
+
+#+begin_src
+select * from entity_location order by dbms_random.random;
+#+end_src
+#+include: ./explain_plan/add_transaction/tmp_map.html
+
+#+begin_src
+select map_id from tmp_map where rownum = 1;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_map_id.html
+
+#+begin_src
+select player_id from tmp_map where rownum = 1 and map_id = 42 and 42 is not null;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_player_id.html
+
+#+begin_src
+select npc_id from tmp_map where rownum = 1 and map_id = 42 and 42 is not null;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_npc_id.html
+
+#+begin_src
+select to_date(sysdate-1000, 'YY-MM-DD HH24:MI:SS')+dbms_random.value(-100, 100) from dual;
+#+end_src
+#+include: ./explain_plan/add_transaction/transaction_timestamp.html
+
+#+begin_src
+select wealth,created_at from player where player_id=42;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_player_wealth_and_created_at.html
+
+#+begin_src
+update (select wealth from player where player_id = 42) set wealth = wealth - 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/update_player.html
+
+#+begin_src
+update (select wealth from non_player_character where npc_id = 42) set wealth = wealth + 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/update_npc.html
+
+** [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]], procedura ~npc_transactions_query~
+Wszystkie przedstawione poniżej zapytania były wywoływane w procedurze ~npc_transactions_query~
+dla każdego rekordu z tabeli ~player~, zatem $10200$ razy.
+
+#+begin_src
+select count(*)
+    from item_ownership_ledger
+    where player_id = 42
+    and npc_id = 42;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/number_of_transactions.html
+
+#+begin_src
+select min(transaction_time)
+    from item_ownership_ledger
+    where player_id = 42
+    and npc_id = 42;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/first_transaction.html
 
 * Poprawione bloki kodu
