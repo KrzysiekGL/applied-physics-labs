@@ -64,13 +64,13 @@ Bloki kodu, które wykonanie zajeło najwięcej czasu to
 Bloki te zostały podanne dalszej analizie oraz przypuszczono próbę optymalizacji
 albo zmniejszenia czasu wykonania zapytań znajdujących się wewnątrz bloków.
 
-* Plany zapytań
-Niżej przedsatiowono plany zapytań dla każdego z bloków poddannych analizie.
+* Plany zapytań /Hot-spots/
+Niżej przedstawiono plany zapytań dla każdego z bloków poddanych analizie.
 Ze względu na brak możliwość sporządzenia całościowego planu zapytań dla procedury per se,
 zostały wykonane oraz przedstawione plany wszystkich zapytań składające się na daną procedurę/blok
 kodu. Ze względu na to, że zapytania zostały wykonane pojedynczo przy wykorzystaniu bezpośrednich
 zapytań do bazy danych, pominięto w zapytaniach polecenia służące do zapisywania odpowiedzi.
-Wartości odpowiedzi z zapytań, które zostały wykorzystane w zapytaniach nasępujących zastąpiono
+Wartości odpowiedzi z zapytań, które zostały wykorzystane w zapytaniach następujących zastąpiono
 wartościami stałymi.
 
 ** [[*~item_ownership_ledger~][~item_ownership_ledger~]], procedura ~add_transaction~
@@ -80,7 +80,9 @@ select to_number(to_char(sysdate, 'sssss')) from dual;
 #+include: ./explain_plan/add_transaction/rseed.html
 
 #+begin_src
-select item_id,name from item where item_type != 0;
+select item_id,name from item
+    where item_type != 0
+    order by dbms_random.random;
 #+end_src
 #+include: ./explain_plan/add_transaction/tmp_item.html
 
@@ -166,17 +168,33 @@ select sum(price)
 #+include: ./explain_plan/npc_transactions_querry/total_price.html
 
 ** Podsumowanie
-Metryki `Cardinality` oraz `Cost` są proprcjonalne do ilość energii oraz czasu ptrzebnych
+Metryki `Cardinality` oraz `Cost` są proporcjonalne do ilość energii oraz czasu potrzebnych
 do przetworzenia zapytań. Im mniejsze będą wartości tych metryk, tym ilość potrzebnej energii
 oraz czasu powinny być mniejsze. Podsumowanie całkowitej wartości obydwu metryk zostało
-przedstawione ponieżej w tabeli. Ponieważ procedura ~npc_transactions_querry~ wykonuje
+przedstawione poniżej w tabeli. Ponieważ procedura ~npc_transactions_querry~ wykonuje
 zapytania w pętli, $10200$ razy, metryki zostały przemnożone przez ilość powtórzeń w celu
-przybliżenia rzeczywistych wartośći `Cardinality` oraz `Cost`, które mogłyby zostać przedstawione
-w ramach wywołania procedury.
+przybliżenia rzeczywistych wartości `Cardinality` oraz `Cost`, które mogłyby zostać przedstawione
+w ramach wywołania procedury. Metryka `Cardinality` jest proporcjonalna do ilości zwracanych
+rekordów w odpowiedzi na zapytanie, natomiast metryka `Cost` jest względną miarą kosztu wykonania
+operacji wybranej przez optymalizator silnika bazodanowego w celu wypracowania odpowiedzi
+na zapytanie.
+p
+| procedura                 | Cardinality             | Cost              | czas wykonania w [s] |
+|---------------------------+-------------------------+-------------------+----------------------|
+| ~add_transaction~         | \vert $558338$          | $480$             | $0.28$               |
+| ~npc_transactions_querry~ | \vert $12×10200=122400$ | $24×10200=244800$ | $1.14$               |
 
-| procedura                 | Cardinality             | Cost              |
-|---------------------------+-------------------------+-------------------|
-| ~add_transaction~         | \vert $554735$          | $70$              |
-| ~npc_transactions_querry~ | \vert $12×10200=122400$ | $24×10200=244800$ |
+W celu poprawienia metryk zapytań skupiono się na dominujących wartościach metryk planów zapytań.
+Rozważając wyniki metryk dla procedury ~add_transaction~ zauważono, że zmniejszenie czasu wykonania
+można być może byłoby możliwe poprzez zmniejszenie wartości metryki `Cardinality`, to znaczy
+ilości pozyskiwanych rekordów w odpowiedzi. Natomiast w przypadku procedury ~npc_transactions_querry~
+być może znaczną poprawę czasu wykonania można byłoby osiągnąć poprzez zmniejszenie ilości iteracji.
+Niezależnie od wartości iteracji, zmniejszenie wartości dowolnej z obydwu metryk procedury
+~npc_transactions_querry~ być może pozytywnie wpłynie na czas wykonania zapytania, ze względu
+na iloczyn tych metryk z wartością iteracji.
 
 * Poprawione bloki kodu
+Próba poprawienia /Hot-spots/ została oparta o zmniejszenie [całkowitych] wartości
+metryk `Cardinality` oraz `Cost` dla obydwu procedur.
+
+** [[*~item_ownership_ledger~][~item_ownership_ledger~]]
