@@ -149,4 +149,34 @@ select min(transaction_time)
 #+end_src
 #+include: ./explain_plan/npc_transactions_querry/first_transaction.html
 
+#+begin_src
+select max(transaction_time)
+    from item_ownership_ledger
+    where player_id = 42
+    and npc_id = 42;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/last_transaction.html
+
+#+begin_src
+select sum(price)
+    from item_ownership_ledger
+    where player_id = 42
+    and npc_id = 42;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/total_price.html
+
+** Podsumowanie
+Metryki `Cardinality` oraz `Cost` są proprcjonalne do ilość energii oraz czasu ptrzebnych
+do przetworzenia zapytań. Im mniejsze będą wartości tych metryk, tym ilość potrzebnej energii
+oraz czasu powinny być mniejsze. Podsumowanie całkowitej wartości obydwu metryk zostało
+przedstawione ponieżej w tabeli. Ponieważ procedura ~npc_transactions_querry~ wykonuje
+zapytania w pętli, $10200$ razy, metryki zostały przemnożone przez ilość powtórzeń w celu
+przybliżenia rzeczywistych wartośći `Cardinality` oraz `Cost`, które mogłyby zostać przedstawione
+w ramach wywołania procedury.
+
+| procedura                 | Cardinality             | Cost              |
+|---------------------------+-------------------------+-------------------|
+| ~add_transaction~         | \vert $554735$          | $70$              |
+| ~npc_transactions_querry~ | \vert $12×10200=122400$ | $24×10200=244800$ |
+
 * Poprawione bloki kodu
