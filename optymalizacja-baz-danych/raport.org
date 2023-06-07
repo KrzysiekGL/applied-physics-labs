@@ -58,10 +58,10 @@ najwięcej trakcji, oraz która z postaci niezależnych dokonała transakcje na 
 #+include: ./queries/npc_ranking.sql src
 
 * /Hot-spots/ miejsca do potencjalnej optymalizacji
-Bloki kodu, które wykonanie zajeło najwięcej czasu to
+Bloki kodu, które wykonanie zajęło najwięcej czasu to
 - [[*~item_ownership_ledger~][~item_ownership_ledger~]], procedura ~add_transaction~ około $0.28$ sekundy
-- [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]], prcedura ~npc_transactions_query~ około $1.14$ sekundy
-Bloki te zostały podanne dalszej analizie oraz przypuszczono próbę optymalizacji
+- [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]], procedura ~npc_transactions_query~ około $1.14$ sekundy
+Bloki te zostały poddane dalszej analizie oraz przypuszczono próbę optymalizacji
 albo zmniejszenia czasu wykonania zapytań znajdujących się wewnątrz bloków.
 
 * Plany zapytań /Hot-spots/
@@ -183,7 +183,7 @@ w ramach wywołania procedury. Metryka `Cardinality` jest proporcjonalna do ilo�
 rekordów w odpowiedzi na zapytanie, natomiast metryka `Cost` jest względną miarą kosztu wykonania
 operacji wybranej przez optymalizator silnika bazodanowego w celu wypracowania odpowiedzi
 na zapytanie.
-p
+
 | procedura                 | Cardinality             | Cost              | czas wykonania w [s] |
 |---------------------------+-------------------------+-------------------+----------------------|
 | ~add_transaction~         | \vert $558340$          | $484$             | $0.28$               |
@@ -208,7 +208,7 @@ procedury ~add_transaction~ przybrał następującą formę:
 
 #+include: ./scripts/opt_add_transaction.sql src
 
-Nowe plany zapytań zosały zaprezentowane poniżej:
+Nowe plany zapytań zostały zaprezentowane poniżej:
 
 #+begin_src
 select dbms_random.value(1, 38)
@@ -272,3 +272,53 @@ update (select wealth from player where player_id = 42) set wealth = wealth - 0;
 update (select wealth from non_player_character where npc_id = 42) set wealth = wealth + 0;
 #+end_src
 #+include: ./explain_plan/add_transaction/update_npc.html
+
+** [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]
+W procedurze ~npc_transactions_querry~ zredukowano 4 osobne zapytania do jednego oraz
+ograniczono zakres pętli ~for~ jedynie do rekordów zawierających istotne informacje
+dla danego zapytania zależnego od wybranego ~this_npc_id~. W rezultacie otrzymano następujący
+kod tej procedury.
+
+#+include: ./queries/opt_npc_transactions.sql src
+
+Uzyskany poprzez redukcję plan zapytań poniżej.
+
+#+begin_src
+select oldest,
+      latest,
+      cnt,
+      prc
+from (
+      select min(transaction_time) oldest,
+            max(transaction_time) latest,
+            count(*) cnt,
+            sum(price) prc
+      from item_ownership_ledger
+      where npc_id  = 1
+      and player_id = 1255
+);
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/opt_all_data.html
+
+** Podsumowanie po poprawie
+Tabela z podsumowaniem wartości metryk po wprowadzeniu zmian w blokach kodu.
+
+| procedura                 | Cardinality -> proporcjonalnie mniejszy o | Cost -> proporcjonalnie mniejszy o | czas wykonania w [s] -> proporcjonalnie mniejszy o |
+|---------------------------+-------------------------------------------+------------------------------------+----------------------------------------------------|
+| ~add_transaction~         | \vert $14819$ -> $97\%$                   | $130$ -> $73\%$                    | $0.21$ -> $25\%$                                   |
+| ~npc_transactions_querry~ | \vert $4$ -> $67\%*$                      | $9$ -> $63\%*$                     | $0.03$ -> $97\%$                                   |
+
+$*$ wartości porównywane przed iloczynem z liczbą iteracji.
+
+W przypadku [[*\[\[*~item_ownership_ledger~\]\[~item_ownership_ledger~\]\]][~item_ownership_ledger~]] dzięki redukcji ilości zapytań i przedstawienia
+uzyskano mniejsze wartości metryk. Szczególnie widać to w przypadku metryki `Cardinality`, która
+wskazuje na mniejszą liczbę pobieranych rekordów z bazy danych. Finalnie poprawa, o ile zauważalna,
+wyniosła jedynie około $25\%$.
+
+Jednakże dla procedury ~npc_transactions_querry~ z bloku kodu [[*\[\[*Transakcje wybranej postaci niezależnej\]\[Transakcje wybranej postaci niezależnej\]\]][Transakcje wybranej postaci niezależnej]]
+uzyskano nie tylko znacząco mniejsze wartości metryk, to znaczy blisko $\frac{2}{3}$ mniejsze
+w obydwu przypadkach, ale również, dzięki redukcji liczby iteracji, znacznej poprawie uległ
+czas wykonywania procedury. Liczbę iteracji pętli ~for~ zredukowano poprzez precyzyjne określenie
+zapytania, z którego pętla ~for~ korzysta, powodujący by ta iterowała jedynie po rekordach
+zawierających informacje dotyczące "sprzedawcę" oraz "nabywcę" a priori.
+
