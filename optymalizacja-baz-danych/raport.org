@@ -87,6 +87,11 @@ select item_id,name from item
 #+include: ./explain_plan/add_transaction/tmp_item.html
 
 #+begin_src
+r_price := dbms_random.value(1, 38);
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_r_price.html
+
+#+begin_src
 select item_id from tmp_item where rownum = 1;
 #+end_src
 #+include: ./explain_plan/add_transaction/r_item_id.html
@@ -181,7 +186,7 @@ na zapytanie.
 p
 | procedura                 | Cardinality             | Cost              | czas wykonania w [s] |
 |---------------------------+-------------------------+-------------------+----------------------|
-| ~add_transaction~         | \vert $558338$          | $480$             | $0.28$               |
+| ~add_transaction~         | \vert $558340$          | $484$             | $0.28$               |
 | ~npc_transactions_querry~ | \vert $12×10200=122400$ | $24×10200=244800$ | $1.14$               |
 
 W celu poprawienia metryk zapytań skupiono się na dominujących wartościach metryk planów zapytań.
@@ -198,3 +203,72 @@ Próba poprawienia /Hot-spots/ została oparta o zmniejszenie [całkowitych] war
 metryk `Cardinality` oraz `Cost` dla obydwu procedur.
 
 ** [[*~item_ownership_ledger~][~item_ownership_ledger~]]
+Po zredukowaniu części zapytań oraz usunięciu bloków z wykonywanym warunkowo kod
+procedury ~add_transaction~ przybrał następującą formę:
+
+#+include: ./scripts/opt_add_transaction.sql src
+
+Nowe plany zapytań zosały zaprezentowane poniżej:
+
+#+begin_src
+select dbms_random.value(1, 38)
+from dual;
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_r_price.html
+
+#+begin_src
+select to_date(sysdate + dbms_random.value(-3650, -365), 'YY-MM-DD HH24:MI:SS')
+from dual;
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_transaction_timestamp.html
+
+#+begin_src
+select item_id
+from (
+  select item_id from item
+  where item_type != 0
+  order by dbms_random.random
+)
+where rownum = 1;
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_r_item.html
+
+#+begin_src
+select p.player_id,
+      n.npc_id
+from (
+  select el.player_id,
+        el.map_id
+  from entity_location el
+  join (
+    select player_id,
+          wealth,
+          created_at
+    from player
+    where wealth >= 0
+    and created_at < (select to_date(sysdate + dbms_random.value(-3650, -365), 'YY-MM-DD HH24:MI:SS') from dual)
+  ) ori
+  on el.player_id = ori.player_id
+  where el.player_id is not null
+  order by dbms_random.random
+) p
+join (
+  select npc_id,map_id
+  from entity_location
+  where npc_id is not null
+  order by dbms_random.random
+) n
+on p.map_id = n.map_id
+where rownum =  1;
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_r_player_and_npc.html
+
+#+begin_src
+update (select wealth from player where player_id = 42) set wealth = wealth - 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/update_player.html
+
+#+begin_src
+update (select wealth from non_player_character where npc_id = 42) set wealth = wealth + 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/update_npc.html

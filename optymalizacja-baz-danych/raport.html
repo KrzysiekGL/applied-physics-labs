@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-06-07 Wed 17:20 -->
+<!-- 2023-06-07 Wed 17:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Raport - Optymalizacja Baz Danych</title>
@@ -225,57 +225,57 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org739c51b">1. Struktura bazy danych</a></li>
-<li><a href="#org09a642c">2. Generowanie danych</a>
+<li><a href="#org2ffa12a">1. Struktura bazy danych</a></li>
+<li><a href="#orgf879e49">2. Generowanie danych</a>
 <ul>
-<li><a href="#orge17afad">2.1. <code>map</code></a></li>
-<li><a href="#orgdb73fb3">2.2. <code>player</code></a></li>
-<li><a href="#orgb388def">2.3. <code>non_player_character</code></a></li>
-<li><a href="#org0f3e876">2.4. <code>item</code></a></li>
-<li><a href="#org9983980">2.5. <code>entity_location</code></a></li>
-<li><a href="#orge08f1b9">2.6. <code>item_ownership_ledger</code></a></li>
+<li><a href="#org627f94b">2.1. <code>map</code></a></li>
+<li><a href="#org82b06ee">2.2. <code>player</code></a></li>
+<li><a href="#orgcb94c4d">2.3. <code>non_player_character</code></a></li>
+<li><a href="#orgc3d6c34">2.4. <code>item</code></a></li>
+<li><a href="#orgdd557a1">2.5. <code>entity_location</code></a></li>
+<li><a href="#org133b851">2.6. <code>item_ownership_ledger</code></a></li>
 </ul>
 </li>
-<li><a href="#orgee5bbe2">3. Zapytania</a>
+<li><a href="#org147f321">3. Zapytania</a>
 <ul>
-<li><a href="#org1c09723">3.1. Przedmioty gracza</a></li>
-<li><a href="#orgb57130c">3.2. Transakcje wybranej postaci niezależnej</a></li>
-<li><a href="#orgd7ab11f">3.3. Ranking postaci niezależnych</a></li>
+<li><a href="#orgcef36fd">3.1. Przedmioty gracza</a></li>
+<li><a href="#orgd069159">3.2. Transakcje wybranej postaci niezależnej</a></li>
+<li><a href="#org451a6df">3.3. Ranking postaci niezależnych</a></li>
 </ul>
 </li>
-<li><a href="#orgd4855d9">4. <i>Hot-spots</i> miejsca do potencjalnej optymalizacji</a></li>
-<li><a href="#org4209dfd">5. Plany zapytań <i>Hot-spots</i></a>
+<li><a href="#org8b3460a">4. <i>Hot-spots</i> miejsca do potencjalnej optymalizacji</a></li>
+<li><a href="#org543bdfd">5. Plany zapytań <i>Hot-spots</i></a>
 <ul>
-<li><a href="#orga1050cd">5.1. <code>item_ownership_ledger</code>, procedura <code>add_transaction</code></a></li>
-<li><a href="#org8c0c04d">5.2. Transakcje wybranej postaci niezależnej, procedura <code>npc_transactions_query</code></a></li>
-<li><a href="#org2b3af30">5.3. Podsumowanie</a></li>
+<li><a href="#org77009f9">5.1. <code>item_ownership_ledger</code>, procedura <code>add_transaction</code></a></li>
+<li><a href="#orga015b60">5.2. Transakcje wybranej postaci niezależnej, procedura <code>npc_transactions_query</code></a></li>
+<li><a href="#org2f77dc9">5.3. Podsumowanie</a></li>
 </ul>
 </li>
-<li><a href="#orgf61d7f0">6. Poprawione bloki kodu</a>
+<li><a href="#orga40cfb7">6. Poprawione bloki kodu</a>
 <ul>
-<li><a href="#orgf997af4">6.1. <code>item_ownership_ledger</code></a></li>
+<li><a href="#orgaa0d876">6.1. <code>item_ownership_ledger</code></a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org739c51b" class="outline-2">
-<h2 id="org739c51b"><span class="section-number-2">1.</span> Struktura bazy danych</h2>
+<div id="outline-container-org2ffa12a" class="outline-2">
+<h2 id="org2ffa12a"><span class="section-number-2">1.</span> Struktura bazy danych</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Przyjęta struktura bazy danych została zaprezentowana na poniższej ilustracji:
 </p>
 
-<div id="orgaef1ab2" class="figure">
+<div id="org569576b" class="figure">
 <p><img src="./structure/mmo-backbone.png" alt="mmo-backbone.png" rotation="90" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org09a642c" class="outline-2">
-<h2 id="org09a642c"><span class="section-number-2">2.</span> Generowanie danych</h2>
+<div id="outline-container-orgf879e49" class="outline-2">
+<h2 id="orgf879e49"><span class="section-number-2">2.</span> Generowanie danych</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Elementy tablic <code>map</code>, <code>player</code>, <code>non_player_character</code>, oraz <code>item</code> zostały wygenerowane na
@@ -284,8 +284,8 @@ zostały wygenerowane na podstawie danych z wyżej wymienionych tablic.
 </p>
 </div>
 
-<div id="outline-container-orge17afad" class="outline-3">
-<h3 id="orge17afad"><span class="section-number-3">2.1.</span> <code>map</code></h3>
+<div id="outline-container-org627f94b" class="outline-3">
+<h3 id="org627f94b"><span class="section-number-3">2.1.</span> <code>map</code></h3>
 <div class="outline-text-3" id="text-2-1">
 <pre class="example">
 create or replace procedure create_maps as
@@ -322,8 +322,8 @@ end create_maps;
 </div>
 </div>
 
-<div id="outline-container-orgdb73fb3" class="outline-3">
-<h3 id="orgdb73fb3"><span class="section-number-3">2.2.</span> <code>player</code></h3>
+<div id="outline-container-org82b06ee" class="outline-3">
+<h3 id="org82b06ee"><span class="section-number-3">2.2.</span> <code>player</code></h3>
 <div class="outline-text-3" id="text-2-2">
 <pre class="example">
 create or replace NONEDITIONABLE procedure create_users as
@@ -380,8 +380,8 @@ end create_users;
 </div>
 </div>
 
-<div id="outline-container-orgb388def" class="outline-3">
-<h3 id="orgb388def"><span class="section-number-3">2.3.</span> <code>non_player_character</code></h3>
+<div id="outline-container-orgcb94c4d" class="outline-3">
+<h3 id="orgcb94c4d"><span class="section-number-3">2.3.</span> <code>non_player_character</code></h3>
 <div class="outline-text-3" id="text-2-3">
 <pre class="example">
 create or replace procedure create_npcs as
@@ -433,8 +433,8 @@ end create_npcs;
 </div>
 </div>
 
-<div id="outline-container-org0f3e876" class="outline-3">
-<h3 id="org0f3e876"><span class="section-number-3">2.4.</span> <code>item</code></h3>
+<div id="outline-container-orgc3d6c34" class="outline-3">
+<h3 id="orgc3d6c34"><span class="section-number-3">2.4.</span> <code>item</code></h3>
 <div class="outline-text-3" id="text-2-4">
 <pre class="example">
 create or replace procedure create_items as
@@ -478,8 +478,8 @@ end create_items;
 </div>
 </div>
 
-<div id="outline-container-org9983980" class="outline-3">
-<h3 id="org9983980"><span class="section-number-3">2.5.</span> <code>entity_location</code></h3>
+<div id="outline-container-orgdd557a1" class="outline-3">
+<h3 id="orgdd557a1"><span class="section-number-3">2.5.</span> <code>entity_location</code></h3>
 <div class="outline-text-3" id="text-2-5">
 <p>
 Elementy tablicy <code>entity_location</code> zawierały informację o zależności (położeniu)
@@ -541,8 +541,8 @@ end populate_location;
 </div>
 </div>
 
-<div id="outline-container-orge08f1b9" class="outline-3">
-<h3 id="orge08f1b9"><span class="section-number-3">2.6.</span> <code>item_ownership_ledger</code></h3>
+<div id="outline-container-org133b851" class="outline-3">
+<h3 id="org133b851"><span class="section-number-3">2.6.</span> <code>item_ownership_ledger</code></h3>
 <div class="outline-text-3" id="text-2-6">
 <p>
 Elementy tablic <code>item_ownership_ledger</code> zostały wygenerowane w następujący sposób:
@@ -646,21 +646,21 @@ end add_transaction;
 </div>
 </div>
 
-<div id="outline-container-orgee5bbe2" class="outline-2">
-<h2 id="orgee5bbe2"><span class="section-number-2">3.</span> Zapytania</h2>
+<div id="outline-container-org147f321" class="outline-2">
+<h2 id="org147f321"><span class="section-number-2">3.</span> Zapytania</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Na podstawie tak wygenerowanych danych zostały przygotowane trzy zapytania.
 </p>
 </div>
 
-<div id="outline-container-org1c09723" class="outline-3">
-<h3 id="org1c09723"><span class="section-number-3">3.1.</span> Przedmioty gracza</h3>
+<div id="outline-container-orgcef36fd" class="outline-3">
+<h3 id="orgcef36fd"><span class="section-number-3">3.1.</span> Przedmioty gracza</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 Pierwsze zapytanie zostało ograniczone do złożonej instrukcji <code>select</code>.
 Zapytanie odpowiada na pytanie <i>jakie przedmioty posiada (pseudo) losowo wybrany gracz
-na podstawie informacji zawartych w</i> <a href="#orge08f1b9"><code>item_ownership_ledger</code></a> <i>?</i>
+na podstawie informacji zawartych w</i> <a href="#org133b851"><code>item_ownership_ledger</code></a> <i>?</i>
 </p>
 <pre class="example">
 -- select all (random) player's items which were obtaind in transactions
@@ -688,12 +688,12 @@ where player_id =
 </div>
 </div>
 
-<div id="outline-container-orgb57130c" class="outline-3">
-<h3 id="orgb57130c"><span class="section-number-3">3.2.</span> Transakcje wybranej postaci niezależnej</h3>
+<div id="outline-container-orgd069159" class="outline-3">
+<h3 id="orgd069159"><span class="section-number-3">3.2.</span> Transakcje wybranej postaci niezależnej</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 Drugie zapytanie zostało przygotowane w postaci procedury korzystającej z globalnej
-tablicy tymczasowej. Dane, z których korzystało zapytanie, pochodziły z tablicy <a href="#orge08f1b9"><code>item_ownership_ledger</code></a>.
+tablicy tymczasowej. Dane, z których korzystało zapytanie, pochodziły z tablicy <a href="#org133b851"><code>item_ownership_ledger</code></a>.
 Zapytanie odpowiadało na pytanie <i>jakich oraz w jakiej ilości transakcji dokonała wybrana</i>
 <i>postać niezależna z pozostałymi graczami, oraz jaka była data pierwszej i ostatniej każdej z
 przeprowadzonych transakcji w zależności od danego gracza?</i>
@@ -759,12 +759,12 @@ end npc_transactions_query;
 </div>
 </div>
 
-<div id="outline-container-orgd7ab11f" class="outline-3">
-<h3 id="orgd7ab11f"><span class="section-number-3">3.3.</span> Ranking postaci niezależnych</h3>
+<div id="outline-container-org451a6df" class="outline-3">
+<h3 id="org451a6df"><span class="section-number-3">3.3.</span> Ranking postaci niezależnych</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 Trzecie zapytanie, przygotowane w postaci procedury, korzystało z drugiego zapytania,
-<a href="#orgb57130c">Transakcje wybranej postaci niezależnej</a>. Na podstawie odpowiedzi z drugiego zapytania, wykonanego
+<a href="#orgd069159">Transakcje wybranej postaci niezależnej</a>. Na podstawie odpowiedzi z drugiego zapytania, wykonanego
 dla każdej z postaci niezależnych, odpowiadało na pytanie <i>która z postaci niezależnych wykonała
 najwięcej trakcji, oraz która z postaci niezależnych dokonała transakcje na największą sumę?</i>
 </p>
@@ -806,15 +806,15 @@ end npc_ranking_query;
 </div>
 </div>
 
-<div id="outline-container-orgd4855d9" class="outline-2">
-<h2 id="orgd4855d9"><span class="section-number-2">4.</span> <i>Hot-spots</i> miejsca do potencjalnej optymalizacji</h2>
+<div id="outline-container-org8b3460a" class="outline-2">
+<h2 id="org8b3460a"><span class="section-number-2">4.</span> <i>Hot-spots</i> miejsca do potencjalnej optymalizacji</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Bloki kodu, które wykonanie zajeło najwięcej czasu to
 </p>
 <ul class="org-ul">
-<li><a href="#orge08f1b9"><code>item_ownership_ledger</code></a>, procedura <code>add_transaction</code> około \(0.28\) sekundy</li>
-<li><a href="#orgb57130c">Transakcje wybranej postaci niezależnej</a>, prcedura <code>npc_transactions_query</code> około \(1.14\) sekundy</li>
+<li><a href="#org133b851"><code>item_ownership_ledger</code></a>, procedura <code>add_transaction</code> około \(0.28\) sekundy</li>
+<li><a href="#orgd069159">Transakcje wybranej postaci niezależnej</a>, prcedura <code>npc_transactions_query</code> około \(1.14\) sekundy</li>
 </ul>
 <p>
 Bloki te zostały podanne dalszej analizie oraz przypuszczono próbę optymalizacji
@@ -823,8 +823,8 @@ albo zmniejszenia czasu wykonania zapytań znajdujących się wewnątrz bloków.
 </div>
 </div>
 
-<div id="outline-container-org4209dfd" class="outline-2">
-<h2 id="org4209dfd"><span class="section-number-2">5.</span> Plany zapytań <i>Hot-spots</i></h2>
+<div id="outline-container-org543bdfd" class="outline-2">
+<h2 id="org543bdfd"><span class="section-number-2">5.</span> Plany zapytań <i>Hot-spots</i></h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Niżej przedstawiono plany zapytań dla każdego z bloków poddanych analizie.
@@ -837,8 +837,8 @@ wartościami stałymi.
 </p>
 </div>
 
-<div id="outline-container-orga1050cd" class="outline-3">
-<h3 id="orga1050cd"><span class="section-number-3">5.1.</span> <a href="#orge08f1b9"><code>item_ownership_ledger</code></a>, procedura <code>add_transaction</code></h3>
+<div id="outline-container-org77009f9" class="outline-3">
+<h3 id="org77009f9"><span class="section-number-3">5.1.</span> <a href="#org133b851"><code>item_ownership_ledger</code></a>, procedura <code>add_transaction</code></h3>
 <div class="outline-text-3" id="text-5-1">
 <pre class="example">
 select to_number(to_char(sysdate, 'sssss')) from dual;
@@ -922,6 +922,43 @@ select item_id,name from item
       <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
    </tr>
    <tr class="level3" id="0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
+   </tr>
+</table>
+
+<pre class="example">
+r_price := dbms_random.value(1, 38);
+</pre>
+    <TABLE id="treeTableWidget"/> 
+    <tr class="Header">
+
+     <th class="even-header-col">&nbsp;OPERATION&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;OBJECT_NAME&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;OPTIONS&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;CARDINALITY&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;COST&nbsp;</th>
+
+    </tr>
+
+   <tr class="level-1" id="0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;SELECT STATEMENT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level0" id="0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;FAST DUAL&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;1&nbsp;</td>
+      <td class="cell01">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level1" id="0.0.0">
       <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
    </tr>
 </table>
@@ -1344,8 +1381,8 @@ update (select wealth from non_player_character where npc_id = 42) set wealth = 
 </div>
 </div>
 
-<div id="outline-container-org8c0c04d" class="outline-3">
-<h3 id="org8c0c04d"><span class="section-number-3">5.2.</span> <a href="#orgb57130c">Transakcje wybranej postaci niezależnej</a>, procedura <code>npc_transactions_query</code></h3>
+<div id="outline-container-orga015b60" class="outline-3">
+<h3 id="orga015b60"><span class="section-number-3">5.2.</span> <a href="#orgd069159">Transakcje wybranej postaci niezależnej</a>, procedura <code>npc_transactions_query</code></h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 Wszystkie przedstawione poniżej zapytania były wywoływane w procedurze <code>npc_transactions_query</code>
@@ -1566,8 +1603,8 @@ select sum(price)
 </div>
 </div>
 
-<div id="outline-container-org2b3af30" class="outline-3">
-<h3 id="org2b3af30"><span class="section-number-3">5.3.</span> Podsumowanie</h3>
+<div id="outline-container-org2f77dc9" class="outline-3">
+<h3 id="org2f77dc9"><span class="section-number-3">5.3.</span> Podsumowanie</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 Metryki `Cardinality` oraz `Cost` są proporcjonalne do ilość energii oraz czasu potrzebnych
@@ -1605,8 +1642,8 @@ p
 <tbody>
 <tr>
 <td class="org-left"><code>add_transaction</code></td>
-<td class="org-left">&vert; \(558338\)</td>
-<td class="org-left">\(480\)</td>
+<td class="org-left">&vert; \(558340\)</td>
+<td class="org-left">\(484\)</td>
 <td class="org-left">\(0.28\)</td>
 </tr>
 
@@ -1633,8 +1670,8 @@ na iloczyn tych metryk z wartością iteracji.
 </div>
 </div>
 
-<div id="outline-container-orgf61d7f0" class="outline-2">
-<h2 id="orgf61d7f0"><span class="section-number-2">6.</span> Poprawione bloki kodu</h2>
+<div id="outline-container-orga40cfb7" class="outline-2">
+<h2 id="orga40cfb7"><span class="section-number-2">6.</span> Poprawione bloki kodu</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 Próba poprawienia <i>Hot-spots</i> została oparta o zmniejszenie [całkowitych] wartości
@@ -1642,14 +1679,519 @@ metryk `Cardinality` oraz `Cost` dla obydwu procedur.
 </p>
 </div>
 
-<div id="outline-container-orgf997af4" class="outline-3">
-<h3 id="orgf997af4"><span class="section-number-3">6.1.</span> <a href="#orge08f1b9"><code>item_ownership_ledger</code></a></h3>
+<div id="outline-container-orgaa0d876" class="outline-3">
+<h3 id="orgaa0d876"><span class="section-number-3">6.1.</span> <a href="#org133b851"><code>item_ownership_ledger</code></a></h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+Po zredukowaniu części zapytań oraz usunięciu bloków z wykonywanym warunkowo kod
+procedury <code>add_transaction</code> przybrał następującą formę:
+</p>
+
+<pre class="example">
+create or replace NONEDITIONABLE procedure add_transaction (
+    in_seed number
+)
+as
+    rseed number(20);
+    r_player_id number(38, 0);
+    r_npc_id number(38, 0);
+    r_item_id number(38, 0);
+    r_price number(38, 0);
+    transaction_timestamp timestamp(6);
+begin
+  -- transaction is a process of buying somethin by a player from an npc
+  -- a tranasction can occure if all of the conditions are met:
+  -- both entities are in the same map (player and npc),
+  -- item of question is tradable (item_type = 1 or item_type = 2),
+  -- price of the item is less than or equal to the wealth of the buying entitie (if not, haggle once),
+  -- random player has to have creation timestamp from before the transaction timestap
+  dbms_output.enable();
+
+  select to_number(to_char(sysdate, 'sssss'))
+  into rseed
+  from dual;
+
+  dbms_random.initialize((rseed+in_seed));
+
+  -- random value for the price
+  select dbms_random.value(1, 38)
+  into r_price
+  from dual;
+
+  -- prepare transaction timestamp
+  select to_date(sysdate + dbms_random.value(-3650, -365), 'YY-MM-DD HH24:MI:SS')
+  into transaction_timestamp
+  from dual;
+
+  -- select random tradable item_id
+  select item_id into r_item_id
+  from (
+    select item_id from item
+    where item_type != 0
+    order by dbms_random.random
+  )
+  where rownum = 1;
+
+  -- select random player and npc, both have to be in the same location
+  select p.player_id,
+	n.npc_id
+  into r_player_id,
+      r_npc_id
+  from (
+    select el.player_id,
+	  el.map_id
+    from entity_location el
+    join (
+      select player_id,
+	    wealth,
+	    created_at
+      from player
+      where wealth &gt;= r_price
+      and created_at &lt; transaction_timestamp
+    ) ori
+    on el.player_id = ori.player_id
+    where el.player_id is not null
+    order by dbms_random.random
+  ) p
+  join (
+    select npc_id,map_id
+    from entity_location
+    where npc_id is not null
+    order by dbms_random.random
+  ) n
+  on p.map_id = n.map_id
+  where rownum =  1;
+
+  -- substract and add price value for the player and for the npc
+  update (select wealth from player where player_id = r_player_id)
+  set wealth = wealth - r_price;
+
+  update (select wealth from non_player_character where npc_id = r_npc_id)
+  set wealth = wealth + r_price;
+
+  -- write the transaction to the ledger
+  insert into item_ownership_ledger values(
+  r_player_id, r_npc_id,
+  r_item_id, r_price,
+  transaction_timestamp
+  );
+
+  commit;
+
+  dbms_random.terminate;
+end add_transaction;
+</pre>
+
+<p>
+Nowe plany zapytań zosały zaprezentowane poniżej:
+</p>
+
+<pre class="example">
+select dbms_random.value(1, 38)
+from dual;
+</pre>
+    <TABLE id="treeTableWidget"/> 
+    <tr class="Header">
+
+     <th class="even-header-col">&nbsp;OPERATION&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;OBJECT_NAME&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;OPTIONS&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;CARDINALITY&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;COST&nbsp;</th>
+
+    </tr>
+
+   <tr class="level-1" id="0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;SELECT STATEMENT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level0" id="0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;FAST DUAL&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;1&nbsp;</td>
+      <td class="cell01">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level1" id="0.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
+   </tr>
+</table>
+
+<pre class="example">
+select to_date(sysdate + dbms_random.value(-3650, -365), 'YY-MM-DD HH24:MI:SS')
+from dual;
+</pre>
+    <TABLE id="treeTableWidget"/> 
+    <tr class="Header">
+
+     <th class="even-header-col">&nbsp;OPERATION&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;OBJECT_NAME&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;OPTIONS&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;CARDINALITY&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;COST&nbsp;</th>
+
+    </tr>
+
+   <tr class="level-1" id="0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;SELECT STATEMENT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level0" id="0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;FAST DUAL&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;1&nbsp;</td>
+      <td class="cell01">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level1" id="0.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
+   </tr>
+</table>
+
+<pre class="example">
+select item_id
+from (
+  select item_id from item
+  where item_type != 0
+  order by dbms_random.random
+)
+where rownum = 1;
+</pre>
+    <TABLE id="treeTableWidget"/> 
+    <tr class="Header">
+
+     <th class="even-header-col">&nbsp;OPERATION&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;OBJECT_NAME&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;OPTIONS&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;CARDINALITY&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;COST&nbsp;</th>
+
+    </tr>
+
+   <tr class="level-1" id="0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;SELECT STATEMENT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level0" id="0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;COUNT&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;STOPKEY&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+   </tr>
+   <tr class="level1" id="0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level2" id="0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;VIEW&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level3" id="0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;SORT&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;ORDER BY STOPKEY&nbsp;</td>
+      <td class="cell00">&nbsp;1&nbsp;</td>
+      <td class="cell01">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level4" id="0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level4" id="0.0.0.0.0.1">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;TABLE ACCESS&nbsp;</td>
+      <td class="cell10">&nbsp;ITEM&nbsp;</td>
+      <td class="cell11">&nbsp;FULL&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level5" id="0.0.0.0.0.1.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level6" id="0.0.0.0.0.1.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
+   </tr>
+</table>
+
+<pre class="example">
+select p.player_id,
+      n.npc_id
+from (
+  select el.player_id,
+	el.map_id
+  from entity_location el
+  join (
+    select player_id,
+	  wealth,
+	  created_at
+    from player
+    where wealth &gt;= 0
+    and created_at &lt; (select to_date(sysdate + dbms_random.value(-3650, -365), 'YY-MM-DD HH24:MI:SS') from dual)
+  ) ori
+  on el.player_id = ori.player_id
+  where el.player_id is not null
+  order by dbms_random.random
+) p
+join (
+  select npc_id,map_id
+  from entity_location
+  where npc_id is not null
+  order by dbms_random.random
+) n
+on p.map_id = n.map_id
+where rownum =  1;
+</pre>
+    <TABLE id="treeTableWidget"/> 
+    <tr class="Header">
+
+     <th class="even-header-col">&nbsp;OPERATION&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;OBJECT_NAME&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;OPTIONS&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;CARDINALITY&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;COST&nbsp;</th>
+
+    </tr>
+
+   <tr class="level-1" id="0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;SELECT STATEMENT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level0" id="0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;COUNT&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;STOPKEY&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+   </tr>
+   <tr class="level1" id="0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level2" id="0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;NESTED LOOPS&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level3" id="0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;VIEW&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;73&nbsp;</td>
+      <td class="cell01">&nbsp;1&nbsp;</td>
+   </tr>
+   <tr class="level4" id="0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;SORT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;ORDER BY&nbsp;</td>
+      <td class="cell10">&nbsp;510&nbsp;</td>
+      <td class="cell11">&nbsp;29&nbsp;</td>
+   </tr>
+   <tr class="level5" id="0.0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;HASH JOIN&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;510&nbsp;</td>
+      <td class="cell01">&nbsp;27&nbsp;</td>
+   </tr>
+   <tr class="level6" id="0.0.0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Access Predicates&nbsp;</td>
+   </tr>
+   <tr class="level6" id="0.0.0.0.0.0.0.1">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;TABLE ACCESS&nbsp;</td>
+      <td class="cell10">&nbsp;PLAYER&nbsp;</td>
+      <td class="cell11">&nbsp;FULL&nbsp;</td>
+      <td class="cell10">&nbsp;510&nbsp;</td>
+      <td class="cell11">&nbsp;18&nbsp;</td>
+   </tr>
+   <tr class="level7" id="0.0.0.0.0.0.0.1.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level7" id="0.0.0.0.0.0.0.1.1">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;FAST DUAL&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;1&nbsp;</td>
+      <td class="cell01">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level8" id="0.0.0.0.0.0.0.1.1.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;TABLE ACCESS&nbsp;</td>
+      <td class="cell10">&nbsp;ENTITY_LOCATION&nbsp;</td>
+      <td class="cell11">&nbsp;FULL&nbsp;</td>
+      <td class="cell10">&nbsp;10200&nbsp;</td>
+      <td class="cell11">&nbsp;9&nbsp;</td>
+   </tr>
+   <tr class="level9" id="0.0.0.0.0.0.0.1.1.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level10" id="0.0.0.0.0.0.0.1.1.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;VIEW&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;1&nbsp;</td>
+      <td class="cell01">&nbsp;1&nbsp;</td>
+   </tr>
+   <tr class="level11" id="0.0.0.0.0.0.0.1.1.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level12" id="0.0.0.0.0.0.0.1.1.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;SORT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;ORDER BY&nbsp;</td>
+      <td class="cell10">&nbsp;1000&nbsp;</td>
+      <td class="cell11">&nbsp;7&nbsp;</td>
+   </tr>
+   <tr class="level13" id="0.0.0.0.0.0.0.1.1.0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;TABLE ACCESS&nbsp;</td>
+      <td class="cell00">&nbsp;ENTITY_LOCATION&nbsp;</td>
+      <td class="cell01">&nbsp;BY INDEX ROWID BATCHED&nbsp;</td>
+      <td class="cell00">&nbsp;1000&nbsp;</td>
+      <td class="cell01">&nbsp;7&nbsp;</td>
+   </tr>
+   <tr class="level14" id="0.0.0.0.0.0.0.1.1.0.0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;INDEX&nbsp;</td>
+      <td class="cell10">&nbsp;EL_UNIQUE_NPC&nbsp;</td>
+      <td class="cell11">&nbsp;FULL SCAN&nbsp;</td>
+      <td class="cell10">&nbsp;1000&nbsp;</td>
+      <td class="cell11">&nbsp;3&nbsp;</td>
+   </tr>
+   <tr class="level15" id="0.0.0.0.0.0.0.1.1.0.0.0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level16" id="0.0.0.0.0.0.0.1.1.0.0.0.0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
+   </tr>
+</table>
+
+<pre class="example">
+update (select wealth from player where player_id = 42) set wealth = wealth - 0;
+</pre>
+<TABLE id="treeTableWidget"/>
+<tr class="Header">
+
+  <th class="even-header-col">&nbsp;OPERATION&nbsp;</th>
+
+  <th class="odd-header-col">&nbsp;OBJECT_NAME&nbsp;</th>
+
+  <th class="even-header-col">&nbsp;OPTIONS&nbsp;</th>
+
+  <th class="odd-header-col">&nbsp;CARDINALITY&nbsp;</th>
+
+  <th class="even-header-col">&nbsp;COST&nbsp;</th>
+
+</tr>
+
+<tr class="level-1" id="0">
+  <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;UPDATE STATEMENT&nbsp;</td>
+  <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+  <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+  <td class="cell10">&nbsp;1&nbsp;</td>
+  <td class="cell11">&nbsp;2&nbsp;</td>
+</tr>
+<tr class="level0" id="0.0">
+  <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;UPDATE&nbsp;</td>
+  <td class="cell00">&nbsp;PLAYER&nbsp;</td>
+  <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+  <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+  <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+</tr>
+<tr class="level1" id="0.0.0">
+  <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;INDEX&nbsp;</td>
+  <td class="cell10">&nbsp;SYS_C0053939&nbsp;</td>
+  <td class="cell11">&nbsp;UNIQUE SCAN&nbsp;</td>
+  <td class="cell10">&nbsp;1&nbsp;</td>
+  <td class="cell11">&nbsp;1&nbsp;</td>
+</tr>
+<tr class="level2" id="0.0.0.0">
+  <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Access Predicates&nbsp;</td>
+</tr>
+<tr class="level3" id="0.0.0.0.0">
+  <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
+</tr>
+</table>
+
+<pre class="example">
+update (select wealth from non_player_character where npc_id = 42) set wealth = wealth + 0;
+</pre>
+    <TABLE id="treeTableWidget"/> 
+    <tr class="Header">
+
+     <th class="even-header-col">&nbsp;OPERATION&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;OBJECT_NAME&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;OPTIONS&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;CARDINALITY&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;COST&nbsp;</th>
+
+    </tr>
+
+   <tr class="level-1" id="0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;UPDATE STATEMENT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;2&nbsp;</td>
+   </tr>
+   <tr class="level0" id="0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;UPDATE&nbsp;</td>
+      <td class="cell00">&nbsp;NON_PLAYER_CHARACTER&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+   </tr>
+   <tr class="level1" id="0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;INDEX&nbsp;</td>
+      <td class="cell10">&nbsp;SYS_C0053940&nbsp;</td>
+      <td class="cell11">&nbsp;UNIQUE SCAN&nbsp;</td>
+      <td class="cell10">&nbsp;1&nbsp;</td>
+      <td class="cell11">&nbsp;1&nbsp;</td>
+   </tr>
+   <tr class="level2" id="0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Access Predicates&nbsp;</td>
+   </tr>
+   <tr class="level3" id="0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
+   </tr>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Krzysztof Szczerbowski</p>
-<p class="date">Created: 2023-06-07 Wed 17:20</p>
+<p class="date">Created: 2023-06-07 Wed 17:42</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
