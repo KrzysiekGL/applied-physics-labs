@@ -43,34 +43,39 @@ begin
   where rownum = 1;
 
   -- select random player and npc, both have to be in the same location
-  select p.player_id,
-        n.npc_id
-  into r_player_id,
-      r_npc_id
-  from (
-    select el.player_id,
-          el.map_id
-    from entity_location el
-    join (
-      select player_id,
-            wealth,
-            created_at
-      from player
-      where wealth >= r_price
-      and created_at < transaction_timestamp
-    ) ori
-    on el.player_id = ori.player_id
-    where el.player_id is not null
-    order by dbms_random.random
-  ) p
-  join (
-    select npc_id,map_id
-    from entity_location
-    where npc_id is not null
-    order by dbms_random.random
-  ) n
-  on p.map_id = n.map_id
-  where rownum =  1;
+  begin
+      select p.player_id,
+            n.npc_id
+      into r_player_id,
+          r_npc_id
+      from (
+        select el.player_id,
+              el.map_id
+        from entity_location el
+        join (
+          select player_id,
+                wealth,
+                created_at
+          from player
+          where wealth >= r_price
+          and created_at < transaction_timestamp
+        ) ori
+        on el.player_id = ori.player_id
+        where el.player_id is not null
+        order by dbms_random.random
+      ) p
+      join (
+        select npc_id,map_id
+        from entity_location
+        where npc_id is not null
+        order by dbms_random.random
+      ) n
+      on p.map_id = n.map_id
+      where rownum =  1;
+      exception
+        when no_data_found then
+        dbms_output.put_line('exception caught: no data found');
+  end;
 
   -- substract and add price value for the player and for the npc
   update (select wealth from player where player_id = r_player_id)
