@@ -322,3 +322,32 @@ czas wykonywania procedury. Liczbę iteracji pętli ~for~ zredukowano poprzez pr
 zapytania, z którego pętla ~for~ korzysta, powodujący by ta iterowała jedynie po rekordach
 zawierających informacje dotyczące "sprzedawcę" oraz "nabywcę" a priori.
 
+* Druga poprawka do [[*\[\[*Transakcje wybranej postaci niezależnej\]\[Transakcje wybranej postaci niezależnej\]\]][Transakcje wybranej postaci niezależnej]]
+Przeprowadzono dalszą redukcję zapytań z procedury ~npc_transactions_querry~ z nastawieniem
+przedewszystkim na eliminację pętli for z bloku kodu. Osiągnięte rezultaty są następujące.
+
+** Plan zapytania procedury ~npc_transactions_querry~
+#+begin_src
+insert into npc_transactions
+select 941,player_id,count(transaction_time),sum(price),min(transaction_time),max(transaction_time)
+from item_ownership_ledger
+where npc_id = 941
+group by player_id;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/opt_opt_all_data.html
+
+Cały blok kodu procedru przybrał następującą postać po poprawce.
+
+#+include: ./queries/opt_opt_npc_transactions.sql src
+
+** Podsumowanie
+Po poprawce, podumowanie planu zapytania oraz czasu wykonania przedstawiono w tabeli poniżej.
+
+| procedura                 | Cardinality | Cost | czas wykonania w [s] |
+|---------------------------+-------------+------+----------------------|
+| ~npc_transactions_querry~ | \vert $6$   | $17$ | $0.03$               |
+
+Pomimo zredukowania kodu procedury, oraz pozbycia się pętli ~for~, wyniki metryk planu zapytań
+uległy poprawie względem poprzednich wyników, jeżeli poprzednie zostałyby pomnożone przez ilość
+iteracji pętli ~for~. Mimo to jednak, dla danych na których zapytanie operuje, przybliżony czas
+realizacji zapytania pozostał bez zmiany.

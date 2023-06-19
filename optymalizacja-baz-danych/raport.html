@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-06-09 Fri 14:00 -->
+<!-- 2023-06-19 Mon 14:03 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Raport - Optymalizacja Baz Danych</title>
@@ -225,59 +225,65 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5245fa7">1. Struktura bazy danych</a></li>
-<li><a href="#org8423595">2. Generowanie danych</a>
+<li><a href="#org5de9dac">1. Struktura bazy danych</a></li>
+<li><a href="#orgb958744">2. Generowanie danych</a>
 <ul>
-<li><a href="#org10ab9ca">2.1. <code>map</code></a></li>
-<li><a href="#org29751b6">2.2. <code>player</code></a></li>
-<li><a href="#org6596ae1">2.3. <code>non_player_character</code></a></li>
-<li><a href="#org1aec3c2">2.4. <code>item</code></a></li>
-<li><a href="#org8f47d70">2.5. <code>entity_location</code></a></li>
-<li><a href="#org3336057">2.6. <code>item_ownership_ledger</code></a></li>
+<li><a href="#org5589a1b">2.1. <code>map</code></a></li>
+<li><a href="#orgb8fbebe">2.2. <code>player</code></a></li>
+<li><a href="#org9b336cf">2.3. <code>non_player_character</code></a></li>
+<li><a href="#org7c9ab81">2.4. <code>item</code></a></li>
+<li><a href="#orga282f29">2.5. <code>entity_location</code></a></li>
+<li><a href="#org10371a7">2.6. <code>item_ownership_ledger</code></a></li>
 </ul>
 </li>
-<li><a href="#org2f56a54">3. Zapytania</a>
+<li><a href="#org9e1691d">3. Zapytania</a>
 <ul>
-<li><a href="#org73e19aa">3.1. Przedmioty gracza</a></li>
-<li><a href="#org1819010">3.2. Transakcje wybranej postaci niezależnej</a></li>
-<li><a href="#orgd99180a">3.3. Ranking postaci niezależnych</a></li>
+<li><a href="#org0476246">3.1. Przedmioty gracza</a></li>
+<li><a href="#org915d31e">3.2. Transakcje wybranej postaci niezależnej</a></li>
+<li><a href="#orgb986b02">3.3. Ranking postaci niezależnych</a></li>
 </ul>
 </li>
-<li><a href="#org75ecd97">4. <i>Hot-spots</i> miejsca do potencjalnej optymalizacji</a></li>
-<li><a href="#org6431829">5. Plany zapytań <i>Hot-spots</i></a>
+<li><a href="#org6d59918">4. <i>Hot-spots</i> miejsca do potencjalnej optymalizacji</a></li>
+<li><a href="#org1cd6901">5. Plany zapytań <i>Hot-spots</i></a>
 <ul>
-<li><a href="#org0aa0d50">5.1. <code>item_ownership_ledger</code>, procedura <code>add_transaction</code></a></li>
-<li><a href="#org8073a1f">5.2. Transakcje wybranej postaci niezależnej, procedura <code>npc_transactions_query</code></a></li>
-<li><a href="#orgce8e6fa">5.3. Podsumowanie</a></li>
+<li><a href="#org09daaf5">5.1. <code>item_ownership_ledger</code>, procedura <code>add_transaction</code></a></li>
+<li><a href="#orge31e4f4">5.2. Transakcje wybranej postaci niezależnej, procedura <code>npc_transactions_query</code></a></li>
+<li><a href="#org1603dd4">5.3. Podsumowanie</a></li>
 </ul>
 </li>
-<li><a href="#orgee31ad3">6. Poprawione bloki kodu</a>
+<li><a href="#org68ff9ec">6. Poprawione bloki kodu</a>
 <ul>
-<li><a href="#org236623d">6.1. <code>item_ownership_ledger</code></a></li>
-<li><a href="#org8c3244a">6.2. Transakcje wybranej postaci niezależnej</a></li>
-<li><a href="#orgf2651be">6.3. Podsumowanie po poprawie</a></li>
+<li><a href="#org18f5bd8">6.1. <code>item_ownership_ledger</code></a></li>
+<li><a href="#org89edd0d">6.2. Transakcje wybranej postaci niezależnej</a></li>
+<li><a href="#org5f7495d">6.3. Podsumowanie po poprawie</a></li>
+</ul>
+</li>
+<li><a href="#org052c204">7. Druga poprawka do Transakcje wybranej postaci niezależnej</a>
+<ul>
+<li><a href="#org9d01b97">7.1. Plan zapytania procedury <code>npc_transactions_querry</code></a></li>
+<li><a href="#org04e4aa3">7.2. Podsumowanie</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org5245fa7" class="outline-2">
-<h2 id="org5245fa7"><span class="section-number-2">1.</span> Struktura bazy danych</h2>
+<div id="outline-container-org5de9dac" class="outline-2">
+<h2 id="org5de9dac"><span class="section-number-2">1.</span> Struktura bazy danych</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Przyjęta struktura bazy danych została zaprezentowana na poniższej ilustracji:
 </p>
 
-<div id="orgd8b1187" class="figure">
+<div id="orgfe012ba" class="figure">
 <p><img src="./structure/mmo-backbone.png" alt="mmo-backbone.png" rotation="90" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org8423595" class="outline-2">
-<h2 id="org8423595"><span class="section-number-2">2.</span> Generowanie danych</h2>
+<div id="outline-container-orgb958744" class="outline-2">
+<h2 id="orgb958744"><span class="section-number-2">2.</span> Generowanie danych</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Elementy tablic <code>map</code>, <code>player</code>, <code>non_player_character</code>, oraz <code>item</code> zostały wygenerowane na
@@ -286,8 +292,8 @@ zostały wygenerowane na podstawie danych z wyżej wymienionych tablic.
 </p>
 </div>
 
-<div id="outline-container-org10ab9ca" class="outline-3">
-<h3 id="org10ab9ca"><span class="section-number-3">2.1.</span> <code>map</code></h3>
+<div id="outline-container-org5589a1b" class="outline-3">
+<h3 id="org5589a1b"><span class="section-number-3">2.1.</span> <code>map</code></h3>
 <div class="outline-text-3" id="text-2-1">
 <pre class="example">
 create or replace procedure create_maps as
@@ -324,8 +330,8 @@ end create_maps;
 </div>
 </div>
 
-<div id="outline-container-org29751b6" class="outline-3">
-<h3 id="org29751b6"><span class="section-number-3">2.2.</span> <code>player</code></h3>
+<div id="outline-container-orgb8fbebe" class="outline-3">
+<h3 id="orgb8fbebe"><span class="section-number-3">2.2.</span> <code>player</code></h3>
 <div class="outline-text-3" id="text-2-2">
 <pre class="example">
 create or replace NONEDITIONABLE procedure create_users as
@@ -382,8 +388,8 @@ end create_users;
 </div>
 </div>
 
-<div id="outline-container-org6596ae1" class="outline-3">
-<h3 id="org6596ae1"><span class="section-number-3">2.3.</span> <code>non_player_character</code></h3>
+<div id="outline-container-org9b336cf" class="outline-3">
+<h3 id="org9b336cf"><span class="section-number-3">2.3.</span> <code>non_player_character</code></h3>
 <div class="outline-text-3" id="text-2-3">
 <pre class="example">
 create or replace procedure create_npcs as
@@ -435,8 +441,8 @@ end create_npcs;
 </div>
 </div>
 
-<div id="outline-container-org1aec3c2" class="outline-3">
-<h3 id="org1aec3c2"><span class="section-number-3">2.4.</span> <code>item</code></h3>
+<div id="outline-container-org7c9ab81" class="outline-3">
+<h3 id="org7c9ab81"><span class="section-number-3">2.4.</span> <code>item</code></h3>
 <div class="outline-text-3" id="text-2-4">
 <pre class="example">
 create or replace procedure create_items as
@@ -480,8 +486,8 @@ end create_items;
 </div>
 </div>
 
-<div id="outline-container-org8f47d70" class="outline-3">
-<h3 id="org8f47d70"><span class="section-number-3">2.5.</span> <code>entity_location</code></h3>
+<div id="outline-container-orga282f29" class="outline-3">
+<h3 id="orga282f29"><span class="section-number-3">2.5.</span> <code>entity_location</code></h3>
 <div class="outline-text-3" id="text-2-5">
 <p>
 Elementy tablicy <code>entity_location</code> zawierały informację o zależności (położeniu)
@@ -543,8 +549,8 @@ end populate_location;
 </div>
 </div>
 
-<div id="outline-container-org3336057" class="outline-3">
-<h3 id="org3336057"><span class="section-number-3">2.6.</span> <code>item_ownership_ledger</code></h3>
+<div id="outline-container-org10371a7" class="outline-3">
+<h3 id="org10371a7"><span class="section-number-3">2.6.</span> <code>item_ownership_ledger</code></h3>
 <div class="outline-text-3" id="text-2-6">
 <p>
 Elementy tablic <code>item_ownership_ledger</code> zostały wygenerowane w następujący sposób:
@@ -648,21 +654,21 @@ end add_transaction;
 </div>
 </div>
 
-<div id="outline-container-org2f56a54" class="outline-2">
-<h2 id="org2f56a54"><span class="section-number-2">3.</span> Zapytania</h2>
+<div id="outline-container-org9e1691d" class="outline-2">
+<h2 id="org9e1691d"><span class="section-number-2">3.</span> Zapytania</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Na podstawie tak wygenerowanych danych zostały przygotowane trzy zapytania.
 </p>
 </div>
 
-<div id="outline-container-org73e19aa" class="outline-3">
-<h3 id="org73e19aa"><span class="section-number-3">3.1.</span> Przedmioty gracza</h3>
+<div id="outline-container-org0476246" class="outline-3">
+<h3 id="org0476246"><span class="section-number-3">3.1.</span> Przedmioty gracza</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 Pierwsze zapytanie zostało ograniczone do złożonej instrukcji <code>select</code>.
 Zapytanie odpowiada na pytanie <i>jakie przedmioty posiada (pseudo) losowo wybrany gracz
-na podstawie informacji zawartych w</i> <a href="#org3336057"><code>item_ownership_ledger</code></a> <i>?</i>
+na podstawie informacji zawartych w</i> <a href="#org10371a7"><code>item_ownership_ledger</code></a> <i>?</i>
 </p>
 <pre class="example">
 -- select all (random) player's items which were obtaind in transactions
@@ -690,12 +696,12 @@ where player_id =
 </div>
 </div>
 
-<div id="outline-container-org1819010" class="outline-3">
-<h3 id="org1819010"><span class="section-number-3">3.2.</span> Transakcje wybranej postaci niezależnej</h3>
+<div id="outline-container-org915d31e" class="outline-3">
+<h3 id="org915d31e"><span class="section-number-3">3.2.</span> Transakcje wybranej postaci niezależnej</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 Drugie zapytanie zostało przygotowane w postaci procedury korzystającej z globalnej
-tablicy tymczasowej. Dane, z których korzystało zapytanie, pochodziły z tablicy <a href="#org3336057"><code>item_ownership_ledger</code></a>.
+tablicy tymczasowej. Dane, z których korzystało zapytanie, pochodziły z tablicy <a href="#org10371a7"><code>item_ownership_ledger</code></a>.
 Zapytanie odpowiadało na pytanie <i>jakich oraz w jakiej ilości transakcji dokonała wybrana</i>
 <i>postać niezależna z pozostałymi graczami, oraz jaka była data pierwszej i ostatniej każdej z
 przeprowadzonych transakcji w zależności od danego gracza?</i>
@@ -761,12 +767,12 @@ end npc_transactions_query;
 </div>
 </div>
 
-<div id="outline-container-orgd99180a" class="outline-3">
-<h3 id="orgd99180a"><span class="section-number-3">3.3.</span> Ranking postaci niezależnych</h3>
+<div id="outline-container-orgb986b02" class="outline-3">
+<h3 id="orgb986b02"><span class="section-number-3">3.3.</span> Ranking postaci niezależnych</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 Trzecie zapytanie, przygotowane w postaci procedury, korzystało z drugiego zapytania,
-<a href="#org1819010">Transakcje wybranej postaci niezależnej</a>. Na podstawie odpowiedzi z drugiego zapytania, wykonanego
+<a href="#org915d31e">Transakcje wybranej postaci niezależnej</a>. Na podstawie odpowiedzi z drugiego zapytania, wykonanego
 dla każdej z postaci niezależnych, odpowiadało na pytanie <i>która z postaci niezależnych wykonała
 najwięcej trakcji, oraz która z postaci niezależnych dokonała transakcje na największą sumę?</i>
 </p>
@@ -808,15 +814,15 @@ end npc_ranking_query;
 </div>
 </div>
 
-<div id="outline-container-org75ecd97" class="outline-2">
-<h2 id="org75ecd97"><span class="section-number-2">4.</span> <i>Hot-spots</i> miejsca do potencjalnej optymalizacji</h2>
+<div id="outline-container-org6d59918" class="outline-2">
+<h2 id="org6d59918"><span class="section-number-2">4.</span> <i>Hot-spots</i> miejsca do potencjalnej optymalizacji</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Bloki kodu, które wykonanie zajęło najwięcej czasu to
 </p>
 <ul class="org-ul">
-<li><a href="#org3336057"><code>item_ownership_ledger</code></a>, procedura <code>add_transaction</code> około \(0.28\) sekundy</li>
-<li><a href="#org1819010">Transakcje wybranej postaci niezależnej</a>, procedura <code>npc_transactions_query</code> około \(1.14\) sekundy</li>
+<li><a href="#org10371a7"><code>item_ownership_ledger</code></a>, procedura <code>add_transaction</code> około \(0.28\) sekundy</li>
+<li><a href="#org915d31e">Transakcje wybranej postaci niezależnej</a>, procedura <code>npc_transactions_query</code> około \(1.14\) sekundy</li>
 </ul>
 <p>
 Bloki te zostały poddane dalszej analizie oraz przypuszczono próbę optymalizacji
@@ -825,8 +831,8 @@ albo zmniejszenia czasu wykonania zapytań znajdujących się wewnątrz bloków.
 </div>
 </div>
 
-<div id="outline-container-org6431829" class="outline-2">
-<h2 id="org6431829"><span class="section-number-2">5.</span> Plany zapytań <i>Hot-spots</i></h2>
+<div id="outline-container-org1cd6901" class="outline-2">
+<h2 id="org1cd6901"><span class="section-number-2">5.</span> Plany zapytań <i>Hot-spots</i></h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Niżej przedstawiono plany zapytań dla każdego z bloków poddanych analizie.
@@ -839,8 +845,8 @@ wartościami stałymi.
 </p>
 </div>
 
-<div id="outline-container-org0aa0d50" class="outline-3">
-<h3 id="org0aa0d50"><span class="section-number-3">5.1.</span> <a href="#org3336057"><code>item_ownership_ledger</code></a>, procedura <code>add_transaction</code></h3>
+<div id="outline-container-org09daaf5" class="outline-3">
+<h3 id="org09daaf5"><span class="section-number-3">5.1.</span> <a href="#org10371a7"><code>item_ownership_ledger</code></a>, procedura <code>add_transaction</code></h3>
 <div class="outline-text-3" id="text-5-1">
 <pre class="example">
 select to_number(to_char(sysdate, 'sssss')) from dual;
@@ -1383,8 +1389,8 @@ update (select wealth from non_player_character where npc_id = 42) set wealth = 
 </div>
 </div>
 
-<div id="outline-container-org8073a1f" class="outline-3">
-<h3 id="org8073a1f"><span class="section-number-3">5.2.</span> <a href="#org1819010">Transakcje wybranej postaci niezależnej</a>, procedura <code>npc_transactions_query</code></h3>
+<div id="outline-container-orge31e4f4" class="outline-3">
+<h3 id="orge31e4f4"><span class="section-number-3">5.2.</span> <a href="#org915d31e">Transakcje wybranej postaci niezależnej</a>, procedura <code>npc_transactions_query</code></h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 Wszystkie przedstawione poniżej zapytania były wywoływane w procedurze <code>npc_transactions_query</code>
@@ -1605,8 +1611,8 @@ select sum(price)
 </div>
 </div>
 
-<div id="outline-container-orgce8e6fa" class="outline-3">
-<h3 id="orgce8e6fa"><span class="section-number-3">5.3.</span> Podsumowanie</h3>
+<div id="outline-container-org1603dd4" class="outline-3">
+<h3 id="org1603dd4"><span class="section-number-3">5.3.</span> Podsumowanie</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 Metryki `Cardinality` oraz `Cost` są proporcjonalne do ilość energii oraz czasu potrzebnych
@@ -1672,8 +1678,8 @@ na iloczyn tych metryk z wartością iteracji.
 </div>
 </div>
 
-<div id="outline-container-orgee31ad3" class="outline-2">
-<h2 id="orgee31ad3"><span class="section-number-2">6.</span> Poprawione bloki kodu</h2>
+<div id="outline-container-org68ff9ec" class="outline-2">
+<h2 id="org68ff9ec"><span class="section-number-2">6.</span> Poprawione bloki kodu</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 Próba poprawienia <i>Hot-spots</i> została oparta o zmniejszenie [całkowitych] wartości
@@ -1681,8 +1687,8 @@ metryk `Cardinality` oraz `Cost` dla obydwu procedur.
 </p>
 </div>
 
-<div id="outline-container-org236623d" class="outline-3">
-<h3 id="org236623d"><span class="section-number-3">6.1.</span> <a href="#org3336057"><code>item_ownership_ledger</code></a></h3>
+<div id="outline-container-org18f5bd8" class="outline-3">
+<h3 id="org18f5bd8"><span class="section-number-3">6.1.</span> <a href="#org10371a7"><code>item_ownership_ledger</code></a></h3>
 <div class="outline-text-3" id="text-6-1">
 <p>
 Po zredukowaniu części zapytań oraz usunięciu bloków z wykonywanym warunkowo kod
@@ -2195,8 +2201,8 @@ update (select wealth from non_player_character where npc_id = 42) set wealth = 
 </div>
 </div>
 
-<div id="outline-container-org8c3244a" class="outline-3">
-<h3 id="org8c3244a"><span class="section-number-3">6.2.</span> <a href="#org1819010">Transakcje wybranej postaci niezależnej</a></h3>
+<div id="outline-container-org89edd0d" class="outline-3">
+<h3 id="org89edd0d"><span class="section-number-3">6.2.</span> <a href="#org915d31e">Transakcje wybranej postaci niezależnej</a></h3>
 <div class="outline-text-3" id="text-6-2">
 <p>
 W procedurze <code>npc_transactions_querry</code> zredukowano 4 osobne zapytania do jednego oraz
@@ -2325,8 +2331,8 @@ from (
 </div>
 </div>
 
-<div id="outline-container-orgf2651be" class="outline-3">
-<h3 id="orgf2651be"><span class="section-number-3">6.3.</span> Podsumowanie po poprawie</h3>
+<div id="outline-container-org5f7495d" class="outline-3">
+<h3 id="org5f7495d"><span class="section-number-3">6.3.</span> Podsumowanie po poprawie</h3>
 <div class="outline-text-3" id="text-6-3">
 <p>
 Tabela z podsumowaniem wartości metryk po wprowadzeniu zmian w blokach kodu.
@@ -2374,14 +2380,14 @@ Tabela z podsumowaniem wartości metryk po wprowadzeniu zmian w blokach kodu.
 </p>
 
 <p>
-W przypadku <a href="#org236623d"><code>item_ownership_ledger</code></a> dzięki redukcji ilości zapytań i przedstawienia
+W przypadku <a href="#org18f5bd8"><code>item_ownership_ledger</code></a> dzięki redukcji ilości zapytań i przedstawienia
 uzyskano mniejsze wartości metryk. Szczególnie widać to w przypadku metryki `Cardinality`, która
 wskazuje na mniejszą liczbę pobieranych rekordów z bazy danych. Finalnie poprawa, o ile zauważalna,
 wyniosła jedynie około \(25\%\).
 </p>
 
 <p>
-Jednakże dla procedury <code>npc_transactions_querry</code> z bloku kodu <a href="#org8c3244a">Transakcje wybranej postaci niezależnej</a>
+Jednakże dla procedury <code>npc_transactions_querry</code> z bloku kodu <a href="#org89edd0d">Transakcje wybranej postaci niezależnej</a>
 uzyskano nie tylko znacząco mniejsze wartości metryk, to znaczy blisko \(\frac{2}{3}\) mniejsze
 w obydwu przypadkach, ale również, dzięki redukcji liczby iteracji, znacznej poprawie uległ
 czas wykonywania procedury. Liczbę iteracji pętli <code>for</code> zredukowano poprzez precyzyjne określenie
@@ -2391,10 +2397,150 @@ zawierających informacje dotyczące "sprzedawcę" oraz "nabywcę" a priori.
 </div>
 </div>
 </div>
+
+<div id="outline-container-org052c204" class="outline-2">
+<h2 id="org052c204"><span class="section-number-2">7.</span> Druga poprawka do <a href="#org89edd0d">Transakcje wybranej postaci niezależnej</a></h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Przeprowadzono dalszą redukcję zapytań z procedury <code>npc_transactions_querry</code> z nastawieniem
+przedewszystkim na eliminację pętli for z bloku kodu. Osiągnięte rezultaty są następujące.
+</p>
+</div>
+
+<div id="outline-container-org9d01b97" class="outline-3">
+<h3 id="org9d01b97"><span class="section-number-3">7.1.</span> Plan zapytania procedury <code>npc_transactions_querry</code></h3>
+<div class="outline-text-3" id="text-7-1">
+<pre class="example">
+insert into npc_transactions
+select 941,player_id,count(transaction_time),sum(price),min(transaction_time),max(transaction_time)
+from item_ownership_ledger
+where npc_id = 941
+group by player_id;
+</pre>
+<TABLE id="treeTableWidget"/> 
+    <tr class="Header">
+
+     <th class="even-header-col">&nbsp;OPERATION&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;OBJECT_NAME&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;OPTIONS&nbsp;</th>
+
+     <th class="odd-header-col">&nbsp;CARDINALITY&nbsp;</th>
+
+     <th class="even-header-col">&nbsp;COST&nbsp;</th>
+
+    </tr>
+
+   <tr class="level-1" id="0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;INSERT STATEMENT&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell10">&nbsp;2&nbsp;</td>
+      <td class="cell11">&nbsp;6&nbsp;</td>
+   </tr>
+   <tr class="level0" id="0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;LOAD TABLE CONVENTIONAL&nbsp;</td>
+      <td class="cell00">&nbsp;NPC_TRANSACTIONS&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell00">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell01">&nbsp;&nbsp&nbsp;</td>
+   </tr>
+   <tr class="level1" id="0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;HASH&nbsp;</td>
+      <td class="cell10">&nbsp;&nbsp&nbsp;</td>
+      <td class="cell11">&nbsp;GROUP BY&nbsp;</td>
+      <td class="cell10">&nbsp;2&nbsp;</td>
+      <td class="cell11">&nbsp;6&nbsp;</td>
+   </tr>
+   <tr class="level2" id="0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;TABLE ACCESS&nbsp;</td>
+      <td class="cell00">&nbsp;ITEM_OWNERSHIP_LEDGER&nbsp;</td>
+      <td class="cell01">&nbsp;FULL&nbsp;</td>
+      <td class="cell00">&nbsp;2&nbsp;</td>
+      <td class="cell01">&nbsp;5&nbsp;</td>
+   </tr>
+   <tr class="level3" id="0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;Filter Predicates&nbsp;</td>
+   </tr>
+   <tr class="level4" id="0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down" onclick="toggleBranch(this)"></i>&nbsp;NPC_ID=941&nbsp;</td>
+   </tr>
+   <tr class="level5" id="0.0.0.0.0.0.0">
+      <td><i class="codicon codicon-chevron-down hide-icon" onclick="toggleBranch(this)"></i>&nbsp;Other XML&nbsp;</td>
+   </tr>
+</table>
+
+<p>
+Cały blok kodu procedru przybrał następującą postać po poprawce.
+</p>
+
+<pre class="example">
+create or replace NONEDITIONABLE procedure npc_transactions_query (
+  this_npc_id number
+)
+as
+begin
+    insert into npc_transactions
+    select this_npc_id,player_id,count(transaction_time),sum(price),min(transaction_time),max(transaction_time)
+    from item_ownership_ledger
+    where npc_id = this_npc_id
+    group by player_id;
+end npc_transactions_query;
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org04e4aa3" class="outline-3">
+<h3 id="org04e4aa3"><span class="section-number-3">7.2.</span> Podsumowanie</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+Po poprawce, podumowanie planu zapytania oraz czasu wykonania przedstawiono w tabeli poniżej.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">procedura</th>
+<th scope="col" class="org-left">Cardinality</th>
+<th scope="col" class="org-left">Cost</th>
+<th scope="col" class="org-left">czas wykonania w [s]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>npc_transactions_querry</code></td>
+<td class="org-left">&vert; \(6\)</td>
+<td class="org-left">\(17\)</td>
+<td class="org-left">\(0.03\)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Pomimo zredukowania kodu procedury, oraz pozbycia się pętli <code>for</code>, wyniki metryk planu zapytań
+uległy poprawie względem poprzednich wyników, jeżeli poprzednie zostałyby pomnożone przez ilość
+iteracji pętli <code>for</code>. Mimo to jednak, dla danych na których zapytanie operuje, przybliżony czas
+realizacji zapytania pozostał bez zmiany.
+</p>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Krzysztof Szczerbowski</p>
-<p class="date">Created: 2023-06-09 Fri 14:00</p>
+<p class="date">Created: 2023-06-19 Mon 14:03</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
