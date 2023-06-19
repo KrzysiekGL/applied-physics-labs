@@ -1,0 +1,353 @@
+#+title: Raport - Optymalizacja Baz Danych
+#+subtitle: Wirtualny rynek graczy i postaci niezależnych
+#+author: Krzysztof Szczerbowski
+
+* Struktura bazy danych
+Przyjęta struktura bazy danych została zaprezentowana na poniższej ilustracji:
+#+attr_html: :rotation 90
+[[./structure/mmo-backbone.png]]
+
+* Generowanie danych
+Elementy tablic ~map~, ~player~, ~non_player_character~, oraz ~item~ zostały wygenerowane na
+podstawie liczb pseudo losowych. Elementy tablic ~entity_location~ i ~item_ownership_ledger~
+zostały wygenerowane na podstawie danych z wyżej wymienionych tablic.
+
+** ~map~
+#+include: ./scripts/create_maps.sql src
+
+** ~player~
+#+include: ./scripts/create_users.sql src
+
+** ~non_player_character~
+#+include: ./scripts/create_npcs.sql src
+
+** ~item~
+#+include: ./scripts/create_items.sql src
+
+** ~entity_location~
+Elementy tablicy ~entity_location~ zawierały informację o zależności (położeniu)
+danych z tablic ~player~ oraz ~non_player_character~ i dane te posiadały rozkład normalny.
+#+include: ./scripts/populate_location.sql src
+
+** ~item_ownership_ledger~
+Elementy tablic ~item_ownership_ledger~ zostały wygenerowane w następujący sposób:
+#+include: ./scripts/add_transaction.sql src
+
+* Zapytania
+Na podstawie tak wygenerowanych danych zostały przygotowane trzy zapytania.
+
+** Przedmioty gracza
+Pierwsze zapytanie zostało ograniczone do złożonej instrukcji ~select~.
+Zapytanie odpowiada na pytanie /jakie przedmioty posiada (pseudo) losowo wybrany gracz
+na podstawie informacji zawartych w/ [[*~item_ownership_ledger~][~item_ownership_ledger~]] /?/
+#+include: ./queries/player_items.sql src
+
+** Transakcje wybranej postaci niezależnej
+Drugie zapytanie zostało przygotowane w postaci procedury korzystającej z globalnej
+tablicy tymczasowej. Dane, z których korzystało zapytanie, pochodziły z tablicy [[*~item_ownership_ledger~][~item_ownership_ledger~]].
+Zapytanie odpowiadało na pytanie /jakich oraz w jakiej ilości transakcji dokonała wybrana/
+/postać niezależna z pozostałymi graczami, oraz jaka była data pierwszej i ostatniej każdej z
+przeprowadzonych transakcji w zależności od danego gracza?/
+#+include: ./queries/npc_transactions.sql src
+
+** Ranking postaci niezależnych
+Trzecie zapytanie, przygotowane w postaci procedury, korzystało z drugiego zapytania,
+[[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]. Na podstawie odpowiedzi z drugiego zapytania, wykonanego
+dla każdej z postaci niezależnych, odpowiadało na pytanie /która z postaci niezależnych wykonała
+najwięcej trakcji, oraz która z postaci niezależnych dokonała transakcje na największą sumę?/
+#+include: ./queries/npc_ranking.sql src
+
+* /Hot-spots/ miejsca do potencjalnej optymalizacji
+Bloki kodu, które wykonanie zajęło najwięcej czasu to
+- [[*~item_ownership_ledger~][~item_ownership_ledger~]], procedura ~add_transaction~ około $0.28$ sekundy
+- [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]], procedura ~npc_transactions_query~ około $1.14$ sekundy
+Bloki te zostały poddane dalszej analizie oraz przypuszczono próbę optymalizacji
+albo zmniejszenia czasu wykonania zapytań znajdujących się wewnątrz bloków.
+
+* Plany zapytań /Hot-spots/
+Niżej przedstawiono plany zapytań dla każdego z bloków poddanych analizie.
+Ze względu na brak możliwość sporządzenia całościowego planu zapytań dla procedury per se,
+zostały wykonane oraz przedstawione plany wszystkich zapytań składające się na daną procedurę/blok
+kodu. Ze względu na to, że zapytania zostały wykonane pojedynczo przy wykorzystaniu bezpośrednich
+zapytań do bazy danych, pominięto w zapytaniach polecenia służące do zapisywania odpowiedzi.
+Wartości odpowiedzi z zapytań, które zostały wykorzystane w zapytaniach następujących zastąpiono
+wartościami stałymi.
+
+** [[*~item_ownership_ledger~][~item_ownership_ledger~]], procedura ~add_transaction~
+#+begin_src
+select to_number(to_char(sysdate, 'sssss')) from dual;
+#+end_src
+#+include: ./explain_plan/add_transaction/rseed.html
+
+#+begin_src
+select item_id,name from item
+    where item_type != 0
+    order by dbms_random.random;
+#+end_src
+#+include: ./explain_plan/add_transaction/tmp_item.html
+
+#+begin_src
+r_price := dbms_random.value(1, 38);
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_r_price.html
+
+#+begin_src
+select item_id from tmp_item where rownum = 1;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_item_id.html
+
+#+begin_src
+select * from entity_location order by dbms_random.random;
+#+end_src
+#+include: ./explain_plan/add_transaction/tmp_map.html
+
+#+begin_src
+select map_id from tmp_map where rownum = 1;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_map_id.html
+
+#+begin_src
+select player_id from tmp_map where rownum = 1 and map_id = 42 and 42 is not null;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_player_id.html
+
+#+begin_src
+select npc_id from tmp_map where rownum = 1 and map_id = 42 and 42 is not null;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_npc_id.html
+
+#+begin_src
+select to_date(sysdate-1000, 'YY-MM-DD HH24:MI:SS')+dbms_random.value(-100, 100) from dual;
+#+end_src
+#+include: ./explain_plan/add_transaction/transaction_timestamp.html
+
+#+begin_src
+select wealth,created_at from player where player_id=42;
+#+end_src
+#+include: ./explain_plan/add_transaction/r_player_wealth_and_created_at.html
+
+#+begin_src
+update (select wealth from player where player_id = 42) set wealth = wealth - 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/update_player.html
+
+#+begin_src
+update (select wealth from non_player_character where npc_id = 42) set wealth = wealth + 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/update_npc.html
+
+** [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]], procedura ~npc_transactions_query~
+Wszystkie przedstawione poniżej zapytania były wywoływane w procedurze ~npc_transactions_query~
+dla każdego rekordu z tabeli ~player~, zatem $10200$ razy.
+
+#+begin_src
+select count(*)
+    from item_ownership_ledger
+    where player_id = 42
+    and npc_id = 42;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/number_of_transactions.html
+
+#+begin_src
+select min(transaction_time)
+    from item_ownership_ledger
+    where player_id = 42
+    and npc_id = 42;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/first_transaction.html
+
+#+begin_src
+select max(transaction_time)
+    from item_ownership_ledger
+    where player_id = 42
+    and npc_id = 42;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/last_transaction.html
+
+#+begin_src
+select sum(price)
+    from item_ownership_ledger
+    where player_id = 42
+    and npc_id = 42;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/total_price.html
+
+** Podsumowanie
+Metryki `Cardinality` oraz `Cost` są proporcjonalne do ilość energii oraz czasu potrzebnych
+do przetworzenia zapytań. Im mniejsze będą wartości tych metryk, tym ilość potrzebnej energii
+oraz czasu powinny być mniejsze. Podsumowanie całkowitej wartości obydwu metryk zostało
+przedstawione poniżej w tabeli. Ponieważ procedura ~npc_transactions_querry~ wykonuje
+zapytania w pętli, $10200$ razy, metryki zostały przemnożone przez ilość powtórzeń w celu
+przybliżenia rzeczywistych wartości `Cardinality` oraz `Cost`, które mogłyby zostać przedstawione
+w ramach wywołania procedury. Metryka `Cardinality` jest proporcjonalna do ilości zwracanych
+rekordów w odpowiedzi na zapytanie, natomiast metryka `Cost` jest względną miarą kosztu wykonania
+operacji wybranej przez optymalizator silnika bazodanowego w celu wypracowania odpowiedzi
+na zapytanie.
+
+| procedura                 | Cardinality             | Cost              | czas wykonania w [s] |
+|---------------------------+-------------------------+-------------------+----------------------|
+| ~add_transaction~         | \vert $558340$          | $484$             | $0.28$               |
+| ~npc_transactions_querry~ | \vert $12×10200=122400$ | $24×10200=244800$ | $1.14$               |
+
+W celu poprawienia metryk zapytań skupiono się na dominujących wartościach metryk planów zapytań.
+Rozważając wyniki metryk dla procedury ~add_transaction~ zauważono, że zmniejszenie czasu wykonania
+można być może byłoby możliwe poprzez zmniejszenie wartości metryki `Cardinality`, to znaczy
+ilości pozyskiwanych rekordów w odpowiedzi. Natomiast w przypadku procedury ~npc_transactions_querry~
+być może znaczną poprawę czasu wykonania można byłoby osiągnąć poprzez zmniejszenie ilości iteracji.
+Niezależnie od wartości iteracji, zmniejszenie wartości dowolnej z obydwu metryk procedury
+~npc_transactions_querry~ być może pozytywnie wpłynie na czas wykonania zapytania, ze względu
+na iloczyn tych metryk z wartością iteracji.
+
+* Poprawione bloki kodu
+Próba poprawienia /Hot-spots/ została oparta o zmniejszenie [całkowitych] wartości
+metryk `Cardinality` oraz `Cost` dla obydwu procedur.
+
+** [[*~item_ownership_ledger~][~item_ownership_ledger~]]
+Po zredukowaniu części zapytań oraz usunięciu bloków z wykonywanym warunkowo kod
+procedury ~add_transaction~ przybrał następującą formę:
+
+#+include: ./scripts/opt_add_transaction.sql src
+
+Nowe plany zapytań zostały zaprezentowane poniżej:
+
+#+begin_src
+select dbms_random.value(1, 38)
+from dual;
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_r_price.html
+
+#+begin_src
+select to_date(sysdate + dbms_random.value(-3650, -365), 'YY-MM-DD HH24:MI:SS')
+from dual;
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_transaction_timestamp.html
+
+#+begin_src
+select item_id
+from (
+  select item_id from item
+  where item_type != 0
+  order by dbms_random.random
+)
+where rownum = 1;
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_r_item.html
+
+#+begin_src
+select p.player_id,
+      n.npc_id
+from (
+  select el.player_id,
+        el.map_id
+  from entity_location el
+  join (
+    select player_id,
+          wealth,
+          created_at
+    from player
+    where wealth >= 0
+    and created_at < (select to_date(sysdate + dbms_random.value(-3650, -365), 'YY-MM-DD HH24:MI:SS') from dual)
+  ) ori
+  on el.player_id = ori.player_id
+  where el.player_id is not null
+  order by dbms_random.random
+) p
+join (
+  select npc_id,map_id
+  from entity_location
+  where npc_id is not null
+  order by dbms_random.random
+) n
+on p.map_id = n.map_id
+where rownum =  1;
+#+end_src
+#+include: ./explain_plan/add_transaction/opt_r_player_and_npc.html
+
+#+begin_src
+update (select wealth from player where player_id = 42) set wealth = wealth - 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/update_player.html
+
+#+begin_src
+update (select wealth from non_player_character where npc_id = 42) set wealth = wealth + 0;
+#+end_src
+#+include: ./explain_plan/add_transaction/update_npc.html
+
+** [[*Transakcje wybranej postaci niezależnej][Transakcje wybranej postaci niezależnej]]
+W procedurze ~npc_transactions_querry~ zredukowano 4 osobne zapytania do jednego oraz
+ograniczono zakres pętli ~for~ jedynie do rekordów zawierających istotne informacje
+dla danego zapytania zależnego od wybranego ~this_npc_id~. W rezultacie otrzymano następujący
+kod tej procedury.
+
+#+include: ./queries/opt_npc_transactions.sql src
+
+Uzyskany poprzez redukcję plan zapytań poniżej.
+
+#+begin_src
+select oldest,
+      latest,
+      cnt,
+      prc
+from (
+      select min(transaction_time) oldest,
+            max(transaction_time) latest,
+            count(*) cnt,
+            sum(price) prc
+      from item_ownership_ledger
+      where npc_id  = 1
+      and player_id = 1255
+);
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/opt_all_data.html
+
+** Podsumowanie po poprawie
+Tabela z podsumowaniem wartości metryk po wprowadzeniu zmian w blokach kodu.
+
+| procedura                 | Cardinality -> proporcjonalnie mniejszy o | Cost -> proporcjonalnie mniejszy o | czas wykonania w [s] -> proporcjonalnie mniejszy o |
+|---------------------------+-------------------------------------------+------------------------------------+----------------------------------------------------|
+| ~add_transaction~         | \vert $14819$ -> $97\%$                   | $130$ -> $73\%$                    | $0.21$ -> $25\%$                                   |
+| ~npc_transactions_querry~ | \vert $4$ -> $67\%*$                      | $9$ -> $63\%*$                     | $0.03$ -> $97\%$                                   |
+
+$*$ wartości porównywane przed iloczynem z liczbą iteracji.
+
+W przypadku [[*\[\[*~item_ownership_ledger~\]\[~item_ownership_ledger~\]\]][~item_ownership_ledger~]] dzięki redukcji ilości zapytań i przedstawienia
+uzyskano mniejsze wartości metryk. Szczególnie widać to w przypadku metryki `Cardinality`, która
+wskazuje na mniejszą liczbę pobieranych rekordów z bazy danych. Finalnie poprawa, o ile zauważalna,
+wyniosła jedynie około $25\%$.
+
+Jednakże dla procedury ~npc_transactions_querry~ z bloku kodu [[*\[\[*Transakcje wybranej postaci niezależnej\]\[Transakcje wybranej postaci niezależnej\]\]][Transakcje wybranej postaci niezależnej]]
+uzyskano nie tylko znacząco mniejsze wartości metryk, to znaczy blisko $\frac{2}{3}$ mniejsze
+w obydwu przypadkach, ale również, dzięki redukcji liczby iteracji, znacznej poprawie uległ
+czas wykonywania procedury. Liczbę iteracji pętli ~for~ zredukowano poprzez precyzyjne określenie
+zapytania, z którego pętla ~for~ korzysta, powodujący by ta iterowała jedynie po rekordach
+zawierających informacje dotyczące "sprzedawcę" oraz "nabywcę" a priori.
+
+* Druga poprawka do [[*\[\[*Transakcje wybranej postaci niezależnej\]\[Transakcje wybranej postaci niezależnej\]\]][Transakcje wybranej postaci niezależnej]]
+Przeprowadzono dalszą redukcję zapytań z procedury ~npc_transactions_querry~ z nastawieniem
+przedewszystkim na eliminację pętli for z bloku kodu. Osiągnięte rezultaty są następujące.
+
+** Plan zapytania procedury ~npc_transactions_querry~
+#+begin_src
+insert into npc_transactions
+select 941,player_id,count(transaction_time),sum(price),min(transaction_time),max(transaction_time)
+from item_ownership_ledger
+where npc_id = 941
+group by player_id;
+#+end_src
+#+include: ./explain_plan/npc_transactions_querry/opt_opt_all_data.html
+
+Cały blok kodu procedru przybrał następującą postać po poprawce.
+
+#+include: ./queries/opt_opt_npc_transactions.sql src
+
+** Podsumowanie
+Po poprawce, podumowanie planu zapytania oraz czasu wykonania przedstawiono w tabeli poniżej.
+
+| procedura                 | Cardinality | Cost | czas wykonania w [s] |
+|---------------------------+-------------+------+----------------------|
+| ~npc_transactions_querry~ | \vert $6$   | $17$ | $0.03$               |
+
+Pomimo zredukowania kodu procedury, oraz pozbycia się pętli ~for~, wyniki metryk planu zapytań
+uległy poprawie względem poprzednich wyników, jeżeli poprzednie zostałyby pomnożone przez ilość
+iteracji pętli ~for~. Mimo to jednak, dla danych na których zapytanie operuje, przybliżony czas
+realizacji zapytania pozostał bez zmiany.
