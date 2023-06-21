@@ -1,0 +1,11 @@
+FROM docker.io/fedora:38
+
+# update
+RUN dnf update -y
+
+# install c/c++ development environment
+RUN dnf group install -y "C Development Tools and Libraries" &&\
+    dnf install -y cmake
+
+# install boost
+RUN dnf install -y boost-devel
