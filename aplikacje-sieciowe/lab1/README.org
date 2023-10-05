@@ -1,0 +1,2 @@
+* TCP server/client couple
+Done with aid of introduction from [[https://www.binarytides.com/socket-programming-c-linux-tutorial/][this site]].
