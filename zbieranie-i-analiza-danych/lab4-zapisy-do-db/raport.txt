@@ -1,0 +1,37 @@
+table with_pk - tablica z primary key
+table with_pk_ai - tablica z primary key autoincrement
+table without_pk - tablica bez primary key
+
+load - ilość dodawanych wierszy
+dt - czas jaki zajęło dodanie tych wierszy [s]
+
+table  with_pk
+load  10000
+dt  0.04325389862060547
+load  100000
+dt  0.38302183151245117
+load  1000000
+dt  3.858403205871582
+load  10000000
+dt  39.90442943572998
+------------
+table  with_pk_ai
+load  10000
+dt  0.04343724250793457
+load  100000
+dt  0.43213343620300293
+load  1000000
+dt  4.383445501327515
+load  10000000
+dt  44.39727854728699
+------------
+table  without_pk
+load  10000
+dt  0.03696393966674805
+load  100000
+dt  0.370330810546875
+load  1000000
+dt  3.773421287536621
+load  10000000
+dt  37.933982849121094
+------------
